@@ -1,0 +1,30 @@
+1. Grouped Bar Chart: Secure vs. Plaintext Execution Time
+	•	X-axis: Specific Genomic Operations (e.g., GC Count, Allele Frequency Sum).
+	•	Y-axis: Time in milliseconds (ms) using a logarithmic scale if necessary.
+	•	Content: Compare the execution time of Plaintext (0.0001 s) against MPyC SMPC (0.0005 s).
+	•	Significance: This chart explicitly visualizes the Overhead Factor ($5.91\times$), demonstrating that your lightweight implementation avoids the $10\times$ to $100\times$ slowdowns typical of heavier SMPC frameworks like SPDZ.
+2. Dual-Axis Line Plot: Blockchain Throughput vs. Latency
+	•	X-axis: Transaction Arrival Rate (Transactions per Second).
+	•	Y1-axis (Left): Achieved Throughput (TPS).
+	•	Y2-axis (Right): Average Transaction Latency (s).
+	•	Content: Plot your results around the stable 42.86 TPS mark.
+	•	Significance: This provides a "Stability Profile" for the Hyperledger Fabric control plane. It proves that sub-second latency ($0.36$ s) is maintained as the transaction load increases, resolving the Integrity-Latency Dilemma seen in public-ledger solutions like ConsentChain ($2.76$ s latency).
+3. Stacked Bar Chart: End-to-End Latency Breakdown
+	•	X-axis: Experimental Runs (e.g., Run 1, Run 2, Run 10).
+	•	Y-axis: Total Time in Seconds (s).
+	•	Content: Break down the 47.33 s E2E latency into its architectural components:
+	◦	Layer 1: Data Ingestion & Sharing.
+	◦	Layer 2: Secure Multi-Party Computation (0.0005 s).
+	◦	Layer 3: Blockchain Integrity Logging (0.36 s).
+	◦	Layer 4: Verifiable Dissemination.
+	•	Significance: This provides transparency regarding the current simulation bottleneck, identifying exactly where the $47$ s delay occurs and showing that the core cryptographic operations are negligible contributors to the total time.
+4. Line Chart: Resource Consumption Profile (Edge Device)
+	•	X-axis: Time during the analysis cycle (s).
+	•	Y1-axis (Left): RAM Utilization (MB).
+	•	Y2-axis (Right): CPU Load (%).
+	•	Content: Plot the memory usage of the MPyC runtime (41.67 MB) and the Fabric peer.
+	•	Significance: This proves the "Lightweight" claim for edge hardware. By showing that peak memory stays significantly below the 8GB limit of the M1 MacBook, you validate the system's suitability for point-of-care clinical environments.
+5. Line Chart: Scalability with Genomic Data Volume
+	•	X-axis: Number of Genomic Nucleotides/SNPs (e.g., 1M, 100M, 1B).
+	•	Y-axis: Execution Time (ms).
+	•	Content: Project how the $0.5$ ms latency for the 1.28 billion GC count scales as data volume increases.
