@@ -863,7 +863,8 @@ def main():
                 insights.append(f"TPS {ledger.get('tps',0.0):.2f} with success rate {ledger.get('tx_success_rate',0.0):.2f}.")
                 insights.append(f"Latency: SMPC {smpc.get('latency_seconds',0.0):.4f}s, Tx Avg {ledger.get('tx_latency_avg',0.0):.4f}s, Query {ledger.get('query_latency',0.0):.4f}s, E2E {end_to_end:.4f}s.")
                 parts.append("\n## Insights\n- "+"\n- ".join(insights))
-                save_check_charts(current_dir, smpc, baseline, ledger, end_to_end)
+                if args.save_check_charts:  # flag existed but was ignored; these charts read paper values from check.txt
+                    save_check_charts(current_dir, smpc, baseline, ledger, end_to_end)
                 if args.tps_latency_sweep:
                     rates = [int(x) for x in args.tps_latency_rates.split(',') if x.strip()]
                     counts = [int(x) for x in args.endorser_counts.split(',') if x.strip()]
@@ -893,7 +894,8 @@ def main():
                 print("Layer 3 failed")
                 end_to_end = time.perf_counter() - t0
                 charts = generate_charts(smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'durations':[]}, end_to_end)
-                save_check_charts(current_dir, smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end)
+                if args.save_check_charts:  # see note above
+                    save_check_charts(current_dir, smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end)
                 write_partial_report(current_dir, 'Layer 3 failed', smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end, charts, 'Layer 3 did not complete', report_path=args.report_path)
                 return 3
         else:
