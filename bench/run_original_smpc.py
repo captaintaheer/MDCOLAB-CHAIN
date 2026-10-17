@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Run the ORIGINAL, unmodified layer-2/layer2_smpc.py repeatedly for several party counts
-and record exactly what it prints (its own timer/memory), to document the 'before' state.
-No measurement logic of layer2_smpc.py is changed; this only invokes it and parses stdout."""
+"""Run layer-2/layer2_smpc.py repeatedly for several party counts and record what it prints
+(its own timer and memory figures). This script only invokes layer2_smpc.py and parses stdout."""
 import csv, os, re, subprocess, sys, argparse
 ap = argparse.ArgumentParser()
 ap.add_argument('--parties', default='1,3,4,5,6,7,8,12,16')

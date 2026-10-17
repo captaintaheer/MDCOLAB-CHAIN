@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Run layer-2/smpc_bench.py over the paper's (n, k) grid, sequentially (one configuration at a time,
-all parties as local processes on this host), and merge per-trial and per-party memory results.
+"""Run layer-2/smpc_bench.py over a grid of party counts n and vector lengths k, sequentially (one
+configuration at a time, all parties as local processes on this host), and merge per-trial and
+per-party memory results.
 
 Profiles:
-  aligned : paper-described setup -> 256-bit prime field (SecInt l=224 gives a 256-bit p in MPyC 0.9),
+  aligned : 256-bit prime field (SecInt l=224 gives a 256-bit p in MPyC 0.9),
             TLS (--ssl) between parties, 10 warm-ups + N=100 trials
-  default : MPyC defaults (SecInt l=32 -> 64-bit p, no TLS), same trial counts (sensitivity check)
+  default : MPyC defaults (SecInt l=32 -> 64-bit p, no TLS), same trial counts
 """
 import argparse, csv, glob, json, os, subprocess, sys, time
 ap = argparse.ArgumentParser()

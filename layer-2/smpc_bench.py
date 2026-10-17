@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
-"""Paper-aligned Layer-2 benchmark harness (added on branch fix/runnable; NOT part of the original code).
+"""Layer-2 vector benchmark harness.
 
-Implements the measurement the paper DESCRIBES (Sec. IV-V) but which the original repository does not
-contain: each of the n parties holds a private allele-count vector v_i of dimension k, secret-shares it
-with MPyC's Shamir sharing (mpc.input), the parties evaluate the linear circuit r = sum_i v_i and
+Each of the n parties holds a private allele-count vector v_i of dimension k and secret-shares it
+with MPyC's Shamir sharing (mpc.input); the parties evaluate the linear circuit r = sum_i v_i and
 reconstruct r (mpc.output). The result is checked against an independent NumPy plaintext oracle.
 
-Run (all parties as local processes, as on the paper's 'edge' host):
+Run (all parties as local processes on one host):
     python smpc_bench.py -M 3 --k 10000 --trials 100 --warmup 10 [--bits 224] [--ssl]
 
-Per trial, party 0 (the 'coordinating party') records with time.perf_counter():
+Per trial, party 0 records with time.perf_counter():
     t_sharing   : mpc.input of all n vectors until every share is locally available (share generation +
-                  distribution; the paper EXCLUDES this from its 'online' figure)
+                  distribution)
     t_eval      : local evaluation of the linear circuit (sum of shared vectors) until result shares exist
     t_recon     : `await mpc.output(r)` (reconstruction, includes one communication round)
-    t_online    : t_eval + t_recon  == paper's definition: from 'all parties hold shares' until r is
-                  available; the timer stops only AFTER `await mpc.output(...)` returns
-    t_hash      : SHA-256(enc(r) || enc(meta)) commitment as described in paper Sec. V-F(d)
+    t_online    : t_eval + t_recon, from 'all parties hold shares' until r is available; the timer stops
+                  after `await mpc.output(...)` returns
+    t_hash      : SHA-256(enc(r) || enc(meta)) commitment
     t_verify    : consumer-side recomputation of the hash and comparison
-Fabric commit is NOT measured here (no Fabric network on this machine).
-The inputs are SYNTHETIC allele counts (Binomial(2*n_i, af)) for 2,504 samples split by sample-id mod n;
-no 1000 Genomes data is used.
+The Fabric commit is not timed by this script.
+Inputs are synthetic allele counts (Binomial(2*n_i, af)) for 2,504 samples split by sample-id mod n.
 """
 import argparse, csv, hashlib, json, os, resource, struct, sys, time
 import numpy as np
 from mpyc.runtime import mpc
 
-N_SAMPLES = 2504  # paper: 2,504 unrelated 1kGP samples (here only used to size the synthetic counts)
+N_SAMPLES = 2504  # number of samples used to size the synthetic counts
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--k', type=int, default=10000)

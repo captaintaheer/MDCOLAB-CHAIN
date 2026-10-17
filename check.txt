@@ -1,4 +1,3 @@
-NOTE (fix/runnable): author planning notes listing TARGET figures for charts; not measurements. automate_layers.py --save_check_charts parses numbers from this file and plots them.
 1. Grouped Bar Chart: Secure vs. Plaintext Execution Time
 	•	X-axis: Specific Genomic Operations (e.g., GC Count, Allele Frequency Sum).
 	•	Y-axis: Time in milliseconds (ms) using a logarithmic scale if necessary.

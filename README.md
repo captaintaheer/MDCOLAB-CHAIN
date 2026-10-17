@@ -3,176 +3,143 @@
 Code accompanying the manuscript *"Empirical Validation, Regulatory Alignment and Design Lessons of a
 Lightweight SMPC–Blockchain Framework for Genomic Privacy"* (JAIT-23816).
 
-> **Status of this repository (verified on branch `fix/runnable`, 2026-10-17).** This README only states
-> facts that were checked against the code or against runs on the branch. Raw measurements (per-trial CSVs, logs and summaries) are in
-> [`results/`](results/).
+## 1. Overview
 
-## 1. What is in the repository
+The framework is organised in four layers.
 
-| Layer (paper) | Paper description | What the repository actually contains |
-|---|---|---|
-| 1. Pre-aggregation + secret sharing | f_pre maps each party's VCF partition to a k-dimensional allele-count vector, which is then Shamir-shared | `layer-1/generate_shares.py` computes **one scalar** (G+C count of a FASTA file) and splits it into 3 **additive** shares (`random.randint(1,10)`, not Shamir, not modular), written to `layer-2/Input-P{0,1,2}-0`. It also writes `layer-1/shares.json`, whose `"shares"` entries are **fresh random numbers** (`random.randint(1,20)`), not the shares. `layer-1/layer1_data_input.py` is an unused PoC (`secretsharing` package, hardcoded toy data). The FASTA `data/genome.fna` is not shipped. No VCF parsing, SNP panel or 1000 Genomes code exists. |
-| 2. SMPC aggregation (MPyC) | n parties evaluate a linear circuit over Shamir-shared vectors | `layer-2/compute_sum.py` (called by the pipeline) sums the three additive shares **in plaintext** and writes `result.txt` and its SHA-256. `layer-2/layer2_smpc.py` is run separately for metrics: it sums the three numbers from `shares.json` as **public constants** (`mpc.SecInt()(x)`, no `mpc.input`), so no party inputs a secret. Before the `automate_layers.py` fix on `fix/runnable` it always ran with a single party (m=1). |
-| 3. Fabric ledger | hash commitments on a Raft-ordered Fabric channel | `automate_layers.py` calls `layer-3/fabric-samples/test-network/blockchain.py` and the `peer` CLI (`CreateAsset` on the sample `basic` chaincode, hash stored in an asset field). `layer-3/fabric-samples` was a **gitlink** to upstream `hyperledger/fabric-samples` commit `7f0f4a24` (2025-07-28) with **no `.gitmodules`**, so it was empty after cloning. It is now replaced by clone instructions (§6). `blockchain.py` exists nowhere in the repo. No chaincode, network configuration, or crypto material of the authors is included. |
-| 4. Consent / dissemination | consent world-state and an access gateway | **Not implemented.** Layer 4 is designed but not evaluated (as the revised manuscript states). |
+| Layer | Files |
+|---|---|
+| 1. Pre-aggregation and secret sharing | `layer-1/generate_shares.py` computes the G+C count of a FASTA file, splits it into three shares written to `layer-2/Input-P{0,1,2}-0`, and writes metadata to `layer-1/shares.json`. `layer-1/layer1_data_input.py` is a standalone secret-sharing example using the `secretsharing` package. |
+| 2. SMPC aggregation (MPyC) | `layer-2/compute_sum.py` reads the three share files, computes their sum and writes `result.txt` with its SHA-256 hash. `layer-2/layer2_smpc.py` performs an MPyC secure sum and prints execution time, memory and communication figures. `layer-2/metrics_collector.py` contains helpers that run and parse these metrics. `layer-2/smpc_bench.py` is a vector benchmark in which each party secret-shares a k-dimensional allele-count vector, the parties compute the sum and reconstruct it, and the result is checked against a NumPy oracle. `layer-2/gen_certs.sh` creates TLS certificates for MPyC's `--ssl` option. |
+| 3. Hyperledger Fabric ledger | `automate_layers.py` runs `layer-3/fabric-samples/test-network/blockchain.py` and uses the `peer` CLI to record result hashes with the `basic` chaincode (`CreateAsset`) on channel `mychannel`, then reads them back (`ReadAsset`) to measure latency and throughput. See `layer-3/README.md` and §5. |
+| 4. Consent and dissemination | Part of the framework design; this repository contains no code for this layer. |
 
-Other files: `automate_layers.py` (orchestrator and report or chart generator), `tps.py` (despite its name, a shell
-heredoc that calls a broken `import  as al` line and points to a macOS path), `check.txt` (author notes listing
-target figures; `automate_layers.py --save_check_charts` **plots these numbers instead of measurements**, see
-the note at the top of `check.txt`), `metrics_report.md` (output of one earlier run; see the header in that file),
-`venv/` and `__pycache__/` were committed by mistake (macOS, Python 3.12, no MPyC). They are untracked on `fix/runnable`.
+Other files:
 
-Added on `fix/runnable`: `requirements.txt`, `layer-2/smpc_bench.py` (paper-aligned vector benchmark),
-`layer-2/gen_certs.sh` (TLS certificates for MPyC `--ssl`), `bench/` (grid runner, summariser,
-pre-aggregation timing, runner for the unmodified `layer2_smpc.py`), `results/` (raw CSVs and logs).
+* `automate_layers.py`: orchestrator that runs Layers 1–3 in sequence, collects metrics and writes a
+  Markdown report with charts.
+* `bench/`: benchmark scripts. `run_grid.py` (runs `smpc_bench.py` over a grid of n and k),
+  `summarize.py` (summary statistics), `make_tables.py` (Markdown tables from the CSVs),
+  `preagg_bench.py` (pre-aggregation timing on synthetic genotypes) and `run_original_smpc.py`
+  (repeated runs of `layer2_smpc.py`).
+* `check.txt`: chart specification notes used by `automate_layers.py --save_check_charts`.
+* `metrics_report.md`: a report produced by `automate_layers.py`.
+* `tps.py`: helper snippet that reads values from `metrics_report.md`.
+* `requirements.txt`: Python dependencies.
 
-## 2. Setup (verified)
+## 2. Requirements and setup
+
+* Python 3.12 (MPyC 0.9 requires `numpy<2`, which has no wheels for Python 3.13).
+* For Layer 3: Docker and the Hyperledger Fabric binaries (see §5).
+* `openssl`, if TLS between MPyC parties is used.
 
 ```bash
-# Python 3.12 is required: MPyC 0.9 needs numpy<2, which has no wheels for Python 3.13.
-uv venv -p 3.12 venv                  # or: python3.12 -m venv venv
+python3.12 -m venv venv               # or: uv venv -p 3.12 venv
 . venv/bin/activate
-pip install -r requirements.txt         # mpyc==0.9, numpy<2 (1.26.4 used), psutil, matplotlib
+pip install -r requirements.txt       # mpyc==0.9, numpy<2, psutil, matplotlib
 ```
-`gmpy2` was **not** installed for the measurements reported here (MPyC prints "Install package gmpy2 for
-better performance").
 
-## 3. Running
+`gmpy2` is optional; MPyC uses it for faster arithmetic when installed.
 
-Original pipeline (Layers 1–2 and the SMPC side metric; Layer 3 needs Fabric, see §6):
+## 3. Running the pipeline
+
 ```bash
 python automate_layers.py --genome data/<file>.fna --allow_multi_smpc --smpc_parties 3 \
        --report_path results/raw/my_report.md
 ```
-Without `--allow_multi_smpc`, `layer2_smpc.py` runs with **one party** (`automate_layers.py:801`).
 
-Paper-aligned Layer-2 benchmark (each party inputs a private k-vector, Shamir sharing, NumPy oracle):
+Main options of `automate_layers.py`:
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--genome PATH` | `data/genome.fna` | FASTA input for Layer 1 |
+| `--report_path PATH` | `metrics_report.md` | where the Markdown report is written |
+| `--allow_multi_smpc` | off | run `layer2_smpc.py` with `--smpc_parties` parties (otherwise one party) |
+| `--smpc_parties N` | 3 | number of MPyC parties |
+| `--smpc_ops N` | 5 | number of secure operations per SMPC run |
+| `--smpc_python PATH` | auto | Python interpreter with MPyC installed |
+| `--smpc_timeout_s S` | 10 | timeout for the SMPC metrics run |
+| `--ledger_txs N` | 3 | number of ledger transactions |
+| `--ledger_concurrency N` | 1 | concurrent ledger transactions |
+| `--mode` | `correctness` | `correctness` or `throughput` |
+| `--pause_ms MS` | 100 | pause between layers |
+| `--disable_peer_stats` | off | skip peer CPU/memory sampling |
+| `--fast_e2e` | off | shorter end-to-end run |
+| `--save_check_charts` | off | also draw the charts described in `check.txt` |
+| `--tps_latency_sweep` | off | TPS/latency sweep over `--tps_latency_rates` and `--endorser_counts` |
+| `--tps_latency_rates` | `50,100,150,200,250` | rates for the sweep |
+| `--endorser_counts` | `1,2,3` | endorser counts for the sweep |
+| `--sweep_concurrency N` | 16 | concurrency for the sweep |
+
+Layer 1 can also be run on its own: `python layer-1/generate_shares.py --genome /path/to/file.fna`.
+
+## 4. Running the Layer-2 benchmark
+
+Single configuration (all parties as local processes on one host):
 ```bash
-cd layer-2 && ./gen_certs.sh 16 && cd ..             # TLS certificates (git-ignored)
-python bench/run_grid.py --profile aligned           # 256-bit prime, --ssl, n∈{3..8,12,16}, k∈{10k,50k,100k}, N=100 after 10 warm-ups
-python bench/run_grid.py --profile default           # MPyC defaults (64-bit prime, no TLS)
-python bench/summarize.py aligned default            # -> results/smpc_summary_*.csv
-python bench/preagg_bench.py                         # synthetic pre-aggregation timing
-python bench/run_original_smpc.py                    # the unmodified layer2_smpc.py, for comparison
+cd layer-2
+python smpc_bench.py -M 3 --k 10000 --trials 100 --warmup 10            # MPyC default field
+python smpc_bench.py -M 3 --k 10000 --trials 100 --warmup 10 --bits 224 # SecInt(224): 256-bit prime field
 ```
 
-## 4. MPyC configuration facts (verified)
+Options: `--k` (vector length), `--trials`, `--warmup`, `--bits` (SecInt bit length; MPyC default is 32,
+which gives a 64-bit prime; 224 gives a 256-bit prime), `--seed`, `--out-dir`, `--tag`. MPyC's own options
+(`-M`, `-I`, `--ssl`, `-T`, ...) are passed through.
 
-* MPyC version: **0.9** (the version named in the paper). The paper's numbers cannot be tied to a version
-  from the repo: the committed `venv/` does not contain MPyC.
-* Field: `mpc.SecInt()` uses the default bit length l=32, giving the prime field
-  **p = 9223372036854775907 (64 bits)** in MPyC 0.9 (MPyC 0.10/0.11: p = 18446744073709551427, also 64 bits).
-  **No MPyC version uses a 256-bit prime by default**, so the paper's statement "MPyC 0.9.x default secint
-  256-bit prime" does not match the code (`layer2_smpc.py:24`, `mpc.SecInt()`). (MPyC's REPL predefines
-  `secfld256 = mpc.SecFld(2**8)`, which is GF(256), a field with 256 *elements*.) The aligned benchmark uses
-  `SecInt(224)`, whose modulus is the 256-bit prime
-  57896044618658097711785492504343953926634992332820282019728792003956564820063.
-* Threshold: MPyC default t = ⌊(n−1)/2⌋. The original code never sets `-T`.
-* TLS: **off** in all original code (no `--ssl` anywhere, no certificates in the repo). MPyC's `--ssl`
-  needs `.config/party_<i>.crt/.key` and `.config/mpyc_ca.crt` (`layer-2/gen_certs.sh` creates them).
-  With `--ssl`, Python's `ssl` default context (OpenSSL 3.5 on the test machine) is used; mutual
-  certificate verification is required (`CERT_REQUIRED`).
-* Parties: all parties run as local processes on one host (`-M n` without `-I` spawns them).
-
-## 5. Timing: what is measured
-
-Original `layer-2/layer2_smpc.py` (unchanged, commit `8695ca4`):
-```python
-16      start_time = time.perf_counter()
-18      await mpc.start()
- ...
-27      for _ in range(args.num_ops):
-28          result = sum(inputs)
-29          results.append(await mpc.output(result))
- ...
-40      await mpc.shutdown()
-42      end_time = time.perf_counter()
-43      execution_time = end_time - start_time
-```
-It **does** await `mpc.output`, but the window also includes `mpc.start()` (connection setup), reading
-`shares.json`, `num_ops` (default 5) outputs, and `mpc.shutdown()`. It is one sample per process and has no
-warm-up. The input is 3 scalars, not a k-vector. It is **not** the online-phase timer the paper describes.
-
-Aligned harness `layer-2/smpc_bench.py` (party 0's clock; parties synchronised before each trial):
-```python
-68      t0 = time.perf_counter()
-69-70   x = [mpc.input(sec.array(v if i == pid else dummy), senders=i) for i in range(m)]
-71      await mpc.gather(x)                 # all shares held locally
-72      t1 = time.perf_counter()            # -> t_sharing = t1 - t0  (share generation + distribution)
-73-76   r = x[0] + x[1] + ... ; await mpc.gather(r)
-77      t2 = time.perf_counter()            # -> t_eval
-78      out = await mpc.output(r)           # reconstruction
-79      t3 = time.perf_counter()            # -> t_recon; t_online = t3 - t1 (paper's definition)
-84/86   t4/t5: SHA-256 commitment h = SHA-256(enc(r) || enc(meta)) and consumer-side re-verification
+TLS between parties (`--ssl`): generate certificates first. They are written to `layer-2/.config/`, which
+is git-ignored.
+```bash
+cd layer-2 && ./gen_certs.sh 16 && cd ..   # certificates for up to 16 parties
 ```
 
-### Per-stage pipeline definition used for `results/`
-`share generation + distribution` (t_sharing) → `online evaluation` (t_eval) → `reconstruction` (t_recon)
-→ `hash commitment` (t_hash) → **Fabric commit (not measurable here)** → `verification` (t_verify).
-MPyC's `mpc.input` generates and sends shares in one call, so generation and distribution cannot be timed
-separately without changing MPyC. Local pre-aggregation (f_pre) is timed separately on synthetic genotypes
-(`bench/preagg_bench.py`).
+Grid runs and summaries:
+```bash
+python bench/run_grid.py --profile aligned   # --ssl, --bits 224, n in {3..8,12,16}, k in {10k,50k,100k}
+python bench/run_grid.py --profile default   # MPyC defaults (no TLS, default field)
+python bench/summarize.py aligned default    # -> results/smpc_summary_<profile>.csv
+python bench/make_tables.py                  # Markdown tables from results/*.csv
+python bench/preagg_bench.py                 # pre-aggregation timing on synthetic genotypes
+python bench/run_original_smpc.py            # repeated runs of layer-2/layer2_smpc.py
+```
+`run_grid.py` accepts `--parties`, `--ks`, `--trials` and `--warmup` to change the grid.
 
-## 6. Hyperledger Fabric (Layer 3): what is needed, and what is unknown
+Per trial, `smpc_bench.py` records on party 0: share generation and distribution (`t_sharing`), circuit
+evaluation (`t_eval`), reconstruction (`t_recon`), online time (`t_online = t_eval + t_recon`), SHA-256
+commitment (`t_hash`) and verification (`t_verify`).
 
-`layer-3/fabric-samples` used to be committed as a bare **gitlink** (mode 160000) pointing at upstream
-`hyperledger/fabric-samples` commit `7f0f4a24fad0f27c952a7d8381d6f7fb4b737871` (2025-07-28, a dependabot
-bump on `main`). There was no `.gitmodules`, so the link carried no content and could not be initialised
-with `git submodule`. It was removed on `fix/runnable` because it can be reproduced exactly from upstream:
+## 5. Layer 3: Hyperledger Fabric setup
+
+Clone `fabric-samples` into `layer-3/` at the commit used by this project and install the Fabric binaries
+and Docker images:
 ```bash
 git clone https://github.com/hyperledger/fabric-samples.git layer-3/fabric-samples
 git -C layer-3/fabric-samples checkout 7f0f4a24fad0f27c952a7d8381d6f7fb4b737871
-cd layer-3/fabric-samples && curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh \
-  && chmod +x install-fabric.sh && ./install-fabric.sh --fabric-version <version> docker binary
+cd layer-3/fabric-samples
+curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh
+chmod +x install-fabric.sh
+./install-fabric.sh --fabric-version <version> docker binary
 ```
-Any author-made files that lived inside that working copy (for example `test-network/blockchain.py`,
-which `automate_layers.py:80-81` runs) were **never committed** and are not recoverable from the repo.
 
-Running Layer 3 requires Docker, `fabric-samples` with the Fabric binaries (`bin/peer`, `config/`), a running
-`test-network` with channel `mychannel`, the `basic` chaincode deployed, and the missing
-`layer-3/fabric-samples/test-network/blockchain.py`. The code assumes 2 orgs (peer0.org1:7051, peer0.org2:9051,
-optional org3:11051) and one orderer at `localhost:7050`. These match the stock `test-network`. At the
-gitlinked commit `7f0f4a24`, upstream `test-network/configtx/configtx.yaml` sets one `etcdraft` consenter,
-`BatchTimeout: 2s`, `MaxMessageCount: 10`, `AbsoluteMaxBytes: 99 MB`, `PreferredMaxBytes: 512 KB`, and the
-`MAJORITY Endorsement` channel policy (checked against upstream on 2026-10-17). Whether the authors changed
-these values is unknown, so they **cannot be assumed** to be the paper's configuration. The code
-measures latency per transaction as the wall time of the `peer chaincode invoke --waitForEvent` CLI call
-plus polling `ReadAsset` until the hash appears (`automate_layers.py:288-313`).
-TPS is computed as successes divided by batch wall time, with a thread pool of CLI calls (`:325-343`).
+Start the test network, create the channel and deploy the `basic` chaincode:
+```bash
+cd test-network
+./network.sh up createChannel -c mychannel
+./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-go -ccl go
+```
 
-The paper's multi-node configuration is **not in the repository**.
+`automate_layers.py` expects `layer-3/fabric-samples/test-network/blockchain.py`, the `peer` binary in
+`layer-3/fabric-samples/bin/`, peers at `localhost:7051` (Org1) and `localhost:9051` (Org2), optionally
+`localhost:11051` (Org3), and the orderer at `localhost:7050`.
 
-## 7. Datasets
+## 6. Threat model
 
-* The paper uses 1000 Genomes NYGC high-coverage data (2,504 unrelated samples) and simulated biobank
-  matrices. **No dataset, download script, SNP-panel selection, partitioning or simulation code is in the repo.**
-  The only data input in the code is a FASTA file for a single GC count.
-* The aligned benchmark uses **synthetic** allele counts: Binomial(2·n_i, af) with af ~ U(0.01, 0.5), for 2,504
-  samples split by sample-id mod n, seeded (`smpc_bench.py:46-50`). This exercises the arithmetic only.
-* "Pre-aggregation off" (Table V: 6.8 s, 420 MB): **no code for this condition exists in the repo.**
+The framework assumes a static, semi-honest adversary that corrupts fewer than half of the computing
+parties (t < n/2). Shamir secret sharing in MPyC protects the pre-aggregated vectors; TLS, Fabric MSP
+identities, Raft ordering and SHA-256 hash commitments are computational mechanisms. The Raft ordering
+service is crash-fault-tolerant (CFT) and is trusted. Malicious parties, side channels and dynamic
+membership are out of scope.
 
-## 8. Reproducing each table and figure
+## 7. Results
 
-| Paper item | Script in repo | Status |
-|---|---|---|
-| Table I (online SMPC, memory) | none originally; now `bench/run_grid.py` + `bench/summarize.py` | re-measured on this branch (x86 VM, synthetic inputs) |
-| Fig. 2 (time/memory vs k, incl. k=25,000) | none | k=25,000 not run |
-| Table II, Fig. 3 (Fabric finality/TPS vs block size/policy) | `automate_layers.py` ledger functions (needs Fabric) | cannot run here (no Docker); multi-node config missing |
-| Table III (pipeline vs n,k) | none (`automate_layers.py` has no k and no n>3 Layer-1 shares) | SMPC stages re-measured; Fabric stage missing |
-| Table V (pre-agg on/off, threshold t) | none | not reproducible from the repo |
-| 200-trial correctness | none originally; per-trial NumPy oracle in `smpc_bench.py` | re-measured |
-| Charts in `metrics_report.md` "Publication Figures" | `save_check_charts()` | built from `check.txt` target values, not measurements |
-
-## 9. Threat model (as stated in the revised manuscript; not something code can verify)
-
-Static, semi-honest adversary corrupting t < n/2 parties (MPyC supports only t < n/2). Information-theoretic
-privacy applies only to the Shamir shares of pre-aggregated vectors. TLS, Fabric MSP identities, Raft ordering
-and SHA-256 are computational mechanisms. Raft is crash-fault-tolerant, not Byzantine-fault-tolerant: the
-ordering service is trusted, and "tamper-evident" assumes uncompromised orderers, no colluding endorser quorum
-and no leaked keys. Malicious parties, side channels and dynamic membership are out of scope. Layer 4 (consent
-gateway) is designed but not implemented or evaluated. Released exact counts carry membership-inference risk.
-
-## 10. Raw data and logs
-
-All measurements from this branch are in `results/` (summary CSVs) and `results/raw/` (per-run logs,
-per-party memory JSON).
+Output files (summary CSVs, per-trial data, logs and per-party memory figures) are in
+[`results/`](results/) and `results/raw/`.

@@ -1,6 +1,4 @@
-# Verified working on Python 3.12 (fix/runnable, 2026-10-17).
-# MPyC 0.9 is the version the paper names; it is NOT compatible with NumPy 2.x
-# (finfields.py uses np.array(..., copy=False)), hence numpy<2. Python 3.13 has no numpy<2 wheels.
+# Python 3.12. MPyC 0.9 requires NumPy < 2 (finfields.py uses np.array(..., copy=False)).
 mpyc==0.9
 numpy<2
 psutil

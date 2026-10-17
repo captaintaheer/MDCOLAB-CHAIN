@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Layer-1 pre-aggregation timing on SYNTHETIC genotypes (no 1000 Genomes data is available in the repo).
+"""Layer-1 pre-aggregation timing on synthetic genotypes.
 Party i holds the samples with sample_id mod n == i (2,504 samples total) as an int8 dosage matrix
 (samples x k SNPs, values 0/1/2) and reduces it to an allele-count vector v_i (column sums).
-Only the reduction is timed (matrix generation is not). VCF parsing is NOT included."""
+Only the reduction is timed (matrix generation and VCF parsing are not included)."""
 import csv, os, time, numpy as np
 rows = []
 for n in [3, 4, 5, 6, 7, 8, 12, 16]:

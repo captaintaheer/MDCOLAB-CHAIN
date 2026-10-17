@@ -41,7 +41,7 @@ def run_command(cmd, cwd=None, env=None):
         print(f"Command output: {e.stdout}")
         print(f"Command error: {e.stderr}")
         return False
-    except OSError as e:  # e.g. missing cwd/script (layer-3/fabric-samples is an empty gitlink)
+    except OSError as e:  # e.g. missing working directory or script
         print(f"Error executing command: {e}")
         return False
 
@@ -156,8 +156,7 @@ def find_mpyc_python(base_dir, override=None):
 def collect_smpc_metrics(base_dir, num_ops=10, parties=3, smpc_python=None, timeout_s=None):
     layer2_dir = os.path.join(base_dir, "layer-2")
     py = find_mpyc_python(base_dir, smpc_python)
-    # NOTE (fix/runnable): `python -m mpyc <script>` does NOT run <script>; in MPyC 0.9-0.11 it starts
-    # MPyC's interactive asyncio REPL, which hangs until the timeout. Run the script directly instead.
+    # Run the MPyC script directly (`python -m mpyc` starts MPyC's interactive REPL).
     cmd = [py, 'layer2_smpc.py', '--num_ops', str(num_ops), '-M', str(parties)]
     to = timeout_s if timeout_s is not None else (10 if parties == 1 else 60)
     try:
@@ -786,7 +785,7 @@ def main():
     parser.add_argument('--tps_latency_rates', type=str, default='50,100,150,200,250')
     parser.add_argument('--endorser_counts', type=str, default='1,2,3')
     parser.add_argument('--sweep_concurrency', type=int, default=16)
-    parser.add_argument('--genome', type=str, default=None, help='FASTA input for Layer 1 (data/genome.fna is not shipped)')
+    parser.add_argument('--genome', type=str, default=None, help='FASTA input for Layer 1 (default: data/genome.fna)')
     parser.add_argument('--report_path', type=str, default=None, help='Where to write the metrics report (default: <repo>/metrics_report.md)')
     args = parser.parse_args()
     
@@ -866,7 +865,7 @@ def main():
                 insights.append(f"TPS {ledger.get('tps',0.0):.2f} with success rate {ledger.get('tx_success_rate',0.0):.2f}.")
                 insights.append(f"Latency: SMPC {smpc.get('latency_seconds',0.0):.4f}s, Tx Avg {ledger.get('tx_latency_avg',0.0):.4f}s, Query {ledger.get('query_latency',0.0):.4f}s, E2E {end_to_end:.4f}s.")
                 parts.append("\n## Insights\n- "+"\n- ".join(insights))
-                if args.save_check_charts:  # flag existed but was ignored; these charts read paper values from check.txt
+                if args.save_check_charts:  # charts built from the values listed in check.txt
                     save_check_charts(current_dir, smpc, baseline, ledger, end_to_end)
                 if args.tps_latency_sweep:
                     rates = [int(x) for x in args.tps_latency_rates.split(',') if x.strip()]
@@ -897,7 +896,7 @@ def main():
                 print("Layer 3 failed")
                 end_to_end = time.perf_counter() - t0
                 charts = generate_charts(smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'durations':[]}, end_to_end)
-                if args.save_check_charts:  # see note above
+                if args.save_check_charts:
                     save_check_charts(current_dir, smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end)
                 write_partial_report(current_dir, 'Layer 3 failed', smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end, charts, 'Layer 3 did not complete', report_path=args.report_path)
                 return 3
