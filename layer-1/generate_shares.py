@@ -66,13 +66,18 @@ def compute_gc_count(fasta_path):
 def main():
     parser = argparse.ArgumentParser(description="Generate secret shares for secure multi-party computation")
     parser.add_argument("--data-id", type=str, default="genomic_001", help="Data identifier (default: genomic_001)")
+    parser.add_argument("--genome", type=str, default=None,
+                        help="Path to the input FASTA file (default: <repo>/data/genome.fna, which is NOT shipped in the repository)")
     args = parser.parse_args()
     
     # Get the directory paths
     current_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.dirname(current_dir)
     layer2_dir = os.path.join(base_dir, "layer-2")
-    genome_path = os.path.join(base_dir, "data/genome.fna")
+    genome_path = args.genome or os.path.join(base_dir, "data/genome.fna")
+    if not os.path.exists(genome_path):
+        raise SystemExit(f"Input FASTA not found: {genome_path}. data/genome.fna is not included in the repository; "
+                         "pass --genome /path/to/file.fna (see README.md).")
     
     # Compute statistic from genomic data
     value = compute_gc_count(genome_path)

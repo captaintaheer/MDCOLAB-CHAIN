@@ -33,3 +33,11 @@ install-fabric.sh
 
 # override the ignore of all config/ folders
 !full-stack-asset-transfer-guide/infrastructure/sample-network/config
+
+# MDCOLAB-CHAIN local artefacts (added in fix/runnable)
+/data/
+/output/
+layer-2/output/
+layer-2/.config/
+__pycache__/
+*.pyc
