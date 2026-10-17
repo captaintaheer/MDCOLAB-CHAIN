@@ -24,7 +24,9 @@ Other files:
   (repeated runs of `layer2_smpc.py`).
 * `check.txt`: chart specification notes used by `automate_layers.py --save_check_charts`.
 * `metrics_report.md`: a report produced by `automate_layers.py`.
-* `tps.py`: helper snippet that reads values from `metrics_report.md`.
+* `tps.py`: TPS/latency sweep on the Fabric test network over arrival rates and endorser counts, using
+  the ledger functions in `automate_layers.py`; writes the charts to `output/charts/`. Requires a running
+  test network (§5).
 * `requirements.txt`: Python dependencies.
 
 ## 2. Requirements and setup
@@ -117,7 +119,7 @@ git -C layer-3/fabric-samples checkout 7f0f4a24fad0f27c952a7d8381d6f7fb4b737871
 cd layer-3/fabric-samples
 curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh
 chmod +x install-fabric.sh
-./install-fabric.sh --fabric-version <version> docker binary
+./install-fabric.sh --fabric-version 2.5.4 docker binary
 ```
 
 Start the test network, create the channel and deploy the `basic` chaincode:

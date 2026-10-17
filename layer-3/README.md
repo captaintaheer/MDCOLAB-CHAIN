@@ -8,7 +8,7 @@ git -C layer-3/fabric-samples checkout 7f0f4a24fad0f27c952a7d8381d6f7fb4b737871
 cd layer-3/fabric-samples
 curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh
 chmod +x install-fabric.sh
-./install-fabric.sh --fabric-version <version> docker binary
+./install-fabric.sh --fabric-version 2.5.4 docker binary
 ```
 
 Start the network and deploy the `basic` chaincode:
