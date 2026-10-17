@@ -1,0 +1,8 @@
+# Verified working on Python 3.12 (fix/runnable, 2026-10-17).
+# MPyC 0.9 is the version the paper names; it is NOT compatible with NumPy 2.x
+# (finfields.py uses np.array(..., copy=False)), hence numpy<2. Python 3.13 has no numpy<2 wheels.
+mpyc==0.9
+numpy<2
+psutil
+# optional: only needed for automate_layers.py charts
+matplotlib
