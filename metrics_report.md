@@ -1,7 +1,7 @@
 <!--
 PROVENANCE NOTE (added on branch fix/runnable, 2026-10-17). The table below is unchanged.
 This file is the output of ONE earlier run of `automate_layers.py` on the author's machine. Run date,
-host and options are not recorded (TODO author). What the code shows about these numbers:
+host and options are not recorded. What the code shows about these numbers:
 - "SMPC *" rows come from layer-2/layer2_smpc.py: a secure sum of 3 scalar public constants from
   layer-1/shares.json (random metadata, not the Layer-1 shares). Before the automate_layers.py fix on fix/runnable the call always fell
   back to ONE party (m=1). "SMPC Comm Bytes = 0" below agrees with that. The timer covers

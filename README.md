@@ -4,8 +4,7 @@ Code accompanying the manuscript *"Empirical Validation, Regulatory Alignment an
 Lightweight SMPC–Blockchain Framework for Genomic Privacy"* (JAIT-23816).
 
 > **Status of this repository (verified on branch `fix/runnable`, 2026-10-17).** This README only states
-> facts that were checked against the code or against runs on the branch. Items the authors still have to
-> supply are marked **TODO (author)**. Raw measurements (per-trial CSVs, logs and summaries) are in
+> facts that were checked against the code or against runs on the branch. Raw measurements (per-trial CSVs, logs and summaries) are in
 > [`results/`](results/).
 
 ## 1. What is in the repository
@@ -36,7 +35,7 @@ uv venv -p 3.12 venv                  # or: python3.12 -m venv venv
 pip install -r requirements.txt         # mpyc==0.9, numpy<2 (1.26.4 used), psutil, matplotlib
 ```
 `gmpy2` was **not** installed for the measurements reported here (MPyC prints "Install package gmpy2 for
-better performance"). TODO (author): state whether gmpy2 was installed for the paper's runs.
+better performance").
 
 ## 3. Running
 
@@ -60,7 +59,7 @@ python bench/run_original_smpc.py                    # the unmodified layer2_smp
 ## 4. MPyC configuration facts (verified)
 
 * MPyC version: **0.9** (the version named in the paper). The paper's numbers cannot be tied to a version
-  from the repo: the committed `venv/` does not contain MPyC. TODO (author): confirm the version used.
+  from the repo: the committed `venv/` does not contain MPyC.
 * Field: `mpc.SecInt()` uses the default bit length l=32, giving the prime field
   **p = 9223372036854775907 (64 bits)** in MPyC 0.9 (MPyC 0.10/0.11: p = 18446744073709551427, also 64 bits).
   **No MPyC version uses a 256-bit prime by default**, so the paper's statement "MPyC 0.9.x default secint
@@ -72,7 +71,7 @@ python bench/run_original_smpc.py                    # the unmodified layer2_smp
 * TLS: **off** in all original code (no `--ssl` anywhere, no certificates in the repo). MPyC's `--ssl`
   needs `.config/party_<i>.crt/.key` and `.config/mpyc_ca.crt` (`layer-2/gen_certs.sh` creates them).
   With `--ssl`, Python's `ssl` default context (OpenSSL 3.5 on the test machine) is used; mutual
-  certificate verification is required (`CERT_REQUIRED`). TODO (author): state whether `--ssl` was on in the paper's runs.
+  certificate verification is required (`CERT_REQUIRED`).
 * Parties: all parties run as local processes on one host (`-M n` without `-I` spawns them).
 
 ## 5. Timing: what is measured
@@ -112,7 +111,7 @@ Aligned harness `layer-2/smpc_bench.py` (party 0's clock; parties synchronised b
 → `hash commitment` (t_hash) → **Fabric commit (not measurable here)** → `verification` (t_verify).
 MPyC's `mpc.input` generates and sends shares in one call, so generation and distribution cannot be timed
 separately without changing MPyC. Local pre-aggregation (f_pre) is timed separately on synthetic genotypes
-(`bench/preagg_bench.py`). TODO (author): the paper's Table III stage boundaries, and the code that produced them.
+(`bench/preagg_bench.py`).
 
 ## 6. Hyperledger Fabric (Layer 3): what is needed, and what is unknown
 
@@ -124,11 +123,10 @@ with `git submodule`. It was removed on `fix/runnable` because it can be reprodu
 git clone https://github.com/hyperledger/fabric-samples.git layer-3/fabric-samples
 git -C layer-3/fabric-samples checkout 7f0f4a24fad0f27c952a7d8381d6f7fb4b737871
 cd layer-3/fabric-samples && curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh \
-  && chmod +x install-fabric.sh && ./install-fabric.sh --fabric-version <TODO author: version> docker binary
+  && chmod +x install-fabric.sh && ./install-fabric.sh --fabric-version <version> docker binary
 ```
 Any author-made files that lived inside that working copy (for example `test-network/blockchain.py`,
 which `automate_layers.py:80-81` runs) were **never committed** and are not recoverable from the repo.
-TODO (author): add `blockchain.py` and any modified network/config files.
 
 Running Layer 3 requires Docker, `fabric-samples` with the Fabric binaries (`bin/peer`, `config/`), a running
 `test-network` with channel `mychannel`, the `basic` chaincode deployed, and the missing
@@ -142,15 +140,7 @@ measures latency per transaction as the wall time of the `peer chaincode invoke 
 plus polling `ReadAsset` until the hash appears (`automate_layers.py:288-313`).
 TPS is computed as successes divided by batch wall time, with a thread pool of CLI calls (`:325-343`).
 
-The paper's multi-node configuration is **not in the repository**. TODO (author), all required by Reviewer 2 Comment 2:
-- Fabric version (thesis mentions 2.5.4: confirm), number of orgs and peers per org, number of Raft orderers
-- `BatchTimeout`, `MaxMessageCount` (paper mentions 20–30 tx blocks), `AbsoluteMaxBytes`, `PreferredMaxBytes`
-- endorsement policy used for 0.36 s (paper: "majority"), and the policies behind ">60 TPS (relaxed)"
-- state database (LevelDB or CouchDB), chaincode name/language, and how h is stored
-- instance types, vCPU/CPU model, RAM, placement (same AZ), RTT
-- load generator (Caliper? the `peer` CLI thread pool in `automate_layers.py`?), offered load (tx/s), run
-  duration, transaction count behind 42.86 TPS
-- raw per-transaction finality logs (for median/p95/p99/SD)
+The paper's multi-node configuration is **not in the repository**.
 
 ## 7. Datasets
 
@@ -159,21 +149,14 @@ The paper's multi-node configuration is **not in the repository**. TODO (author)
   The only data input in the code is a FASTA file for a single GC count.
 * The aligned benchmark uses **synthetic** allele counts: Binomial(2·n_i, af) with af ~ U(0.01, 0.5), for 2,504
   samples split by sample-id mod n, seeded (`smpc_bench.py:46-50`). This exercises the arithmetic only.
-* TODO (author): VCF release and build; chromosomes; SNP-panel filters (MAF, call rate, HWE, LD pruning or random);
-  partition rule (manuscript says "sample ID mod n [A: confirm]"); simulated-matrix generator (individuals,
-  AF source, genotype model, seed, software); scripts for each.
-* TODO (author): independent validation of f_pre against `bcftools +fill-tags`/`bcftools query` or
-  `plink2 --freq counts` on the raw VCFs (Reviewer 2 Comment 4.5). Not possible here: no VCFs, and no
-  bcftools or PLINK installed.
 * "Pre-aggregation off" (Table V: 6.8 s, 420 MB): **no code for this condition exists in the repo.**
-  TODO (author): define what is shared in that condition and why it fits in 420 MB.
 
 ## 8. Reproducing each table and figure
 
 | Paper item | Script in repo | Status |
 |---|---|---|
 | Table I (online SMPC, memory) | none originally; now `bench/run_grid.py` + `bench/summarize.py` | re-measured on this branch (x86 VM, synthetic inputs) |
-| Fig. 2 (time/memory vs k, incl. k=25,000) | none | k=25,000 not run; TODO (author) |
+| Fig. 2 (time/memory vs k, incl. k=25,000) | none | k=25,000 not run |
 | Table II, Fig. 3 (Fabric finality/TPS vs block size/policy) | `automate_layers.py` ledger functions (needs Fabric) | cannot run here (no Docker); multi-node config missing |
 | Table III (pipeline vs n,k) | none (`automate_layers.py` has no k and no n>3 Layer-1 shares) | SMPC stages re-measured; Fabric stage missing |
 | Table V (pre-agg on/off, threshold t) | none | not reproducible from the repo |
@@ -192,5 +175,4 @@ gateway) is designed but not implemented or evaluated. Released exact counts car
 ## 10. Raw data and logs
 
 All measurements from this branch are in `results/` (summary CSVs) and `results/raw/` (per-run logs,
-per-party memory JSON). TODO (author): archive the original per-trial logs behind the paper's tables (the
-manuscript says they exist; none are in the repo).
+per-party memory JSON).
