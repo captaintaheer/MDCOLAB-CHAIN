@@ -36,6 +36,13 @@ ap.add_argument('--out-dir', default='../results/raw/aligned')
 ap.add_argument('--tag', default='run')
 args, _ = ap.parse_known_args()   # MPyC parses its own options (-M, -I, --ssl, ...)
 
+if mpc.options.ssl:   # MPyC reads the TLS files from .config/ in the working directory
+    _need = ['mpyc_ca.crt'] + [f'party_{i}.{e}' for i in range(len(mpc.parties)) for e in ('crt', 'key')]
+    _missing = [f for f in _need if not os.path.exists(os.path.join('.config', f))]
+    if _missing:
+        sys.exit(f"--ssl: {len(_missing)} TLS file(s) missing in {os.path.abspath('.config')} "
+                 f"(e.g. {', '.join(_missing[:3])}). Run ./gen_certs.sh {len(mpc.parties)} in layer-2 first.")
+
 
 def party_samples(pid, m):
     return sum(1 for s in range(N_SAMPLES) if s % m == pid)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Print markdown tables from results/*.csv (no numbers are typed by hand)."""
-import csv, os, sys, numpy as np
+import csv, os, numpy as np
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 R = lambda f: list(csv.DictReader(open(os.path.join(root, 'results', f)))) if os.path.exists(os.path.join(root, 'results', f)) else []
 f2 = lambda x, d=2: f"{float(x):.{d}f}"

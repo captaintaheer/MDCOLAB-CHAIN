@@ -6,7 +6,6 @@ and saves the result to an output file for Layer-3.
 """
 
 import os
-import json
 import hashlib
 import argparse
 

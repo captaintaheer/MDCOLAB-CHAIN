@@ -1,6 +1,6 @@
 from mpyc.runtime import mpc
 import json
-import asyncio
+import os
 import time
 import psutil
 import argparse
@@ -18,7 +18,7 @@ async def main():
     await mpc.start()
 
     # Load shares or use hardcoded
-    with open("../layer-1/shares.json", "r") as f:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "layer-1", "shares.json"), "r") as f:
         shares_data = json.load(f)["shares"]
     # Convert to secure ints (assuming shares are integers)
     inputs = [mpc.SecInt()(int(share.split('-')[1])) for share in shares_data]
@@ -32,7 +32,6 @@ async def main():
         if current_mem > peak_mem:
             peak_mem = current_mem
 
-    m = len(mpc.parties)
     nbytes = [peer.protocol.nbytes_sent if peer.pid != mpc.pid else 0 for peer in mpc.parties]
     comm_bytes = sum(nbytes)
     comm_rounds = args.num_ops
