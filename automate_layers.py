@@ -42,7 +42,7 @@ def run_command(cmd, cwd=None, env=None):
         print(f"Command error: {e.stderr}")
         return False
 
-def run_layer1(base_dir):
+def run_layer1(base_dir, genome=None):
     """
     Run Layer-1: Secret sharing
     """
@@ -55,6 +55,8 @@ def run_layer1(base_dir):
     
     # Run the script
     cmd = [sys.executable, script_path]
+    if genome:
+        cmd += ['--genome', genome]
     return run_command(cmd, cwd=layer1_dir)
 
 def run_layer2(base_dir):
@@ -151,10 +153,12 @@ def find_mpyc_python(base_dir, override=None):
 def collect_smpc_metrics(base_dir, num_ops=10, parties=3, smpc_python=None, timeout_s=None):
     layer2_dir = os.path.join(base_dir, "layer-2")
     py = find_mpyc_python(base_dir, smpc_python)
-    cmd = [py, '-m', 'mpyc', 'layer2_smpc.py', '--num_ops', str(num_ops), '-M', str(parties)]
+    # NOTE (fix/runnable): `python -m mpyc <script>` does NOT run <script>; in MPyC 0.9-0.11 it starts
+    # MPyC's interactive asyncio REPL, which hangs until the timeout. Run the script directly instead.
+    cmd = [py, 'layer2_smpc.py', '--num_ops', str(num_ops), '-M', str(parties)]
     to = timeout_s if timeout_s is not None else (10 if parties == 1 else 60)
     try:
-        result = subprocess.run(cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=to)
+        result = subprocess.run(cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=to, stdin=subprocess.DEVNULL)
         output = (result.stdout or '') + "\n" + (result.stderr or '')
     except subprocess.TimeoutExpired as e:
         def _to_str(x):
@@ -172,7 +176,7 @@ def collect_smpc_metrics(base_dir, num_ops=10, parties=3, smpc_python=None, time
     if not metrics:
         alt_cmd = [py, 'layer2_smpc.py', '--num_ops', str(num_ops)]
         try:
-            alt = subprocess.run(alt_cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=30)
+            alt = subprocess.run(alt_cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
             alt_out = (alt.stdout or '') + "\n" + (alt.stderr or '')
             metrics = parse_smpc_output(alt_out)
         except subprocess.CalledProcessError:
@@ -452,7 +456,7 @@ def render_markdown_table(rows):
         lines.append('| ' + ' | '.join(str(r[h]) for h in headers) + ' |')
     return '\n'.join(lines)
 
-def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None, end_to_end=None, charts=None, error=None):
+def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None, end_to_end=None, charts=None, error=None, report_path=None):
     smpc = smpc or {}
     baseline = baseline or {}
     ledger = ledger or {}
@@ -494,7 +498,7 @@ def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None,
         parts.append('```\n'+charts['durations_ascii']+'\n```')
     out_dir = os.path.join(base_dir, 'output', 'charts')
     os.makedirs(out_dir, exist_ok=True)
-    report_path = os.path.join(base_dir, 'metrics_report.md')
+    report_path = report_path or os.path.join(base_dir, 'metrics_report.md')
     final_md = "\n".join(parts)
     with open(report_path, 'w') as f:
         f.write(final_md)
@@ -779,6 +783,8 @@ def main():
     parser.add_argument('--tps_latency_rates', type=str, default='50,100,150,200,250')
     parser.add_argument('--endorser_counts', type=str, default='1,2,3')
     parser.add_argument('--sweep_concurrency', type=int, default=16)
+    parser.add_argument('--genome', type=str, default=None, help='FASTA input for Layer 1 (data/genome.fna is not shipped)')
+    parser.add_argument('--report_path', type=str, default=None, help='Where to write the metrics report (default: <repo>/metrics_report.md)')
     args = parser.parse_args()
     
     # Get the base directory
@@ -788,7 +794,7 @@ def main():
     
     t0 = time.perf_counter()
     # Run each layer sequentially
-    if run_layer1(current_dir):
+    if run_layer1(current_dir, args.genome):
         print("Layer 1 completed successfully")
         
         time.sleep(max(args.pause_ms, 0) / 1000.0)
@@ -837,7 +843,7 @@ def main():
                 print("Successfully processed genomic dataset through all layers")
                 print("\n===== METRICS REPORT =====")
                 print(md)
-                report_path = os.path.join(current_dir, 'metrics_report.md')
+                report_path = args.report_path or os.path.join(current_dir, 'metrics_report.md')
                 charts = generate_charts(smpc, baseline, ledger, end_to_end)
                 parts = [md, "", "## Charts",]
                 if charts.get('throughput_png'):
@@ -888,17 +894,17 @@ def main():
                 end_to_end = time.perf_counter() - t0
                 charts = generate_charts(smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'durations':[]}, end_to_end)
                 save_check_charts(current_dir, smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end)
-                write_partial_report(current_dir, 'Layer 3 failed', smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end, charts, 'Layer 3 did not complete')
+                write_partial_report(current_dir, 'Layer 3 failed', smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end, charts, 'Layer 3 did not complete', report_path=args.report_path)
                 return 3
         else:
             print("Layer 2 failed")
             end_to_end = time.perf_counter() - t0
-            write_partial_report(current_dir, 'Layer 2 failed', {}, {}, {}, end_to_end, {}, 'Layer 2 did not complete')
+            write_partial_report(current_dir, 'Layer 2 failed', {}, {}, {}, end_to_end, {}, 'Layer 2 did not complete', report_path=args.report_path)
             return 2
     else:
         print("Layer 1 failed")
         end_to_end = time.perf_counter() - t0
-        write_partial_report(current_dir, 'Layer 1 failed', {}, {}, {}, end_to_end, {}, 'Layer 1 did not complete')
+        write_partial_report(current_dir, 'Layer 1 failed', {}, {}, {}, end_to_end, {}, 'Layer 1 did not complete', report_path=args.report_path)
         return 1
 
 if __name__ == "__main__":
