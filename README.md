@@ -119,8 +119,11 @@ separately without changing MPyC. Local pre-aggregation (f_pre) is timed separat
 Running Layer 3 requires Docker, `fabric-samples` with the Fabric binaries (`bin/peer`, `config/`), a running
 `test-network` with channel `mychannel`, the `basic` chaincode deployed, and the missing
 `layer-3/fabric-samples/test-network/blockchain.py`. The code assumes 2 orgs (peer0.org1:7051, peer0.org2:9051,
-optional org3:11051) and one orderer at `localhost:7050`. These are the `test-network` defaults: a single
-Raft orderer, LevelDB, `BatchTimeout` 2s and `MaxMessageCount` 10 in the stock `configtx.yaml`. The code
+optional org3:11051) and one orderer at `localhost:7050`. These match the stock `test-network`. At the
+gitlinked commit `7f0f4a24`, upstream `test-network/configtx/configtx.yaml` sets one `etcdraft` consenter,
+`BatchTimeout: 2s`, `MaxMessageCount: 10`, `AbsoluteMaxBytes: 99 MB`, `PreferredMaxBytes: 512 KB`, and the
+`MAJORITY Endorsement` channel policy (checked against upstream on 2026-10-17). Whether the authors changed
+these values is unknown, so they **cannot be assumed** to be the paper's configuration. The code
 measures latency per transaction as the wall time of the `peer chaincode invoke --waitForEvent` CLI call
 plus polling `ReadAsset` until the hash appears (`automate_layers.py:288-313`).
 TPS is computed as successes divided by batch wall time, with a thread pool of CLI calls (`:325-343`).
