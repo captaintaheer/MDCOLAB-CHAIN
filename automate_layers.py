@@ -14,7 +14,7 @@ import argparse
 import time
 import json
 import re
-import hashlib
+import shutil
 import psutil
 import concurrent.futures
 import base64
@@ -77,6 +77,28 @@ def run_layer2(base_dir):
     cmd = [sys.executable, script_path]
     return run_command(cmd, cwd=layer2_dir)
 
+def check_fabric(base_dir, need_script=True):
+    """
+    Return a list of reasons why the Fabric test network cannot be used (empty if it looks usable).
+    """
+    problems = []
+    layer3_dir = os.path.join(base_dir, "layer-3", "fabric-samples", "test-network")
+    if not os.path.isdir(layer3_dir):
+        problems.append(f"{os.path.relpath(layer3_dir, base_dir)} not found (fabric-samples is not cloned)")
+    elif need_script and not os.path.exists(os.path.join(layer3_dir, "blockchain.py")):
+        problems.append(f"{os.path.relpath(os.path.join(layer3_dir, 'blockchain.py'), base_dir)} not found")
+    peer_bin = os.path.join(base_dir, "layer-3", "fabric-samples", "bin", "peer")
+    if not os.path.exists(peer_bin):
+        problems.append(f"{os.path.relpath(peer_bin, base_dir)} not found (Fabric binaries are not installed)")
+    if shutil.which("docker") is None:
+        problems.append("docker is not installed or not on PATH")
+    else:
+        try:
+            subprocess.run(["docker", "info"], check=True, capture_output=True, timeout=30)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+            problems.append("the Docker daemon is not reachable (`docker info` failed)")
+    return problems
+
 def run_layer3(base_dir):
     """
     Run Layer-3: Blockchain integration
@@ -84,6 +106,13 @@ def run_layer3(base_dir):
     print("\n===== LAYER 3: BLOCKCHAIN INTEGRATION =====")
     layer3_dir = os.path.join(base_dir, "layer-3", "fabric-samples", "test-network")
     script_path = os.path.join(layer3_dir, "blockchain.py")
+    problems = check_fabric(base_dir)
+    if problems:
+        print("Hyperledger Fabric is not available, so Layer 3 cannot run:")
+        for p in problems:
+            print(f"  - {p}")
+        print("See layer-3/README.md for the Fabric setup.")
+        return False
     
     # Run the script
     cmd = [sys.executable, script_path]
@@ -590,10 +619,10 @@ def save_check_charts(base_dir, smpc, baseline, ledger, end_to_end):
         runs = ['Run 1','Run 2','Run 10']
         fig3 = plt.figure(figsize=(6,3))
         idx = list(range(len(runs)))
-        b1 = plt.bar(idx, [l1]*len(runs), label='Layer 1')
-        b2 = plt.bar(idx, [l2]*len(runs), bottom=[l1]*len(runs), label='Layer 2')
-        b3 = plt.bar(idx, [l3]*len(runs), bottom=[l1+l2]*len(runs), label='Layer 3')
-        b4 = plt.bar(idx, [l4]*len(runs), bottom=[l1+l2+l3]*len(runs), label='Layer 4')
+        plt.bar(idx, [l1]*len(runs), label='Layer 1')
+        plt.bar(idx, [l2]*len(runs), bottom=[l1]*len(runs), label='Layer 2')
+        plt.bar(idx, [l3]*len(runs), bottom=[l1+l2]*len(runs), label='Layer 3')
+        plt.bar(idx, [l4]*len(runs), bottom=[l1+l2+l3]*len(runs), label='Layer 4')
         plt.xticks(idx, runs)
         plt.ylabel('s')
         plt.title('End-to-End Latency Breakdown')
