@@ -116,6 +116,20 @@ separately without changing MPyC. Local pre-aggregation (f_pre) is timed separat
 
 ## 6. Hyperledger Fabric (Layer 3): what is needed, and what is unknown
 
+`layer-3/fabric-samples` used to be committed as a bare **gitlink** (mode 160000) pointing at upstream
+`hyperledger/fabric-samples` commit `7f0f4a24fad0f27c952a7d8381d6f7fb4b737871` (2025-07-28, a dependabot
+bump on `main`). There was no `.gitmodules`, so the link carried no content and could not be initialised
+with `git submodule`. It was removed on `fix/runnable` because it can be reproduced exactly from upstream:
+```bash
+git clone https://github.com/hyperledger/fabric-samples.git layer-3/fabric-samples
+git -C layer-3/fabric-samples checkout 7f0f4a24fad0f27c952a7d8381d6f7fb4b737871
+cd layer-3/fabric-samples && curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh \
+  && chmod +x install-fabric.sh && ./install-fabric.sh --fabric-version <TODO author: version> docker binary
+```
+Any author-made files that lived inside that working copy (for example `test-network/blockchain.py`,
+which `automate_layers.py:80-81` runs) were **never committed** and are not recoverable from the repo.
+TODO (author): add `blockchain.py` and any modified network/config files.
+
 Running Layer 3 requires Docker, `fabric-samples` with the Fabric binaries (`bin/peer`, `config/`), a running
 `test-network` with channel `mychannel`, the `basic` chaincode deployed, and the missing
 `layer-3/fabric-samples/test-network/blockchain.py`. The code assumes 2 orgs (peer0.org1:7051, peer0.org2:9051,
