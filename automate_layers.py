@@ -56,7 +56,7 @@ def run_layer1(base_dir, genome=None):
     # Run the script
     cmd = [sys.executable, script_path]
     if genome:
-        cmd += ['--genome', genome]
+        cmd += ['--genome', os.path.abspath(genome)]  # Layer 1 runs with cwd=layer-1
     return run_command(cmd, cwd=layer1_dir)
 
 def run_layer2(base_dir):
