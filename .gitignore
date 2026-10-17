@@ -41,3 +41,4 @@ layer-2/output/
 layer-2/.config/
 __pycache__/
 *.pyc
+/venv/
