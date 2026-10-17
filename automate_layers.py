@@ -41,6 +41,9 @@ def run_command(cmd, cwd=None, env=None):
         print(f"Command output: {e.stdout}")
         print(f"Command error: {e.stderr}")
         return False
+    except OSError as e:  # e.g. missing cwd/script (layer-3/fabric-samples is an empty gitlink)
+        print(f"Error executing command: {e}")
+        return False
 
 def run_layer1(base_dir, genome=None):
     """
