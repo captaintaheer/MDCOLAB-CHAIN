@@ -1,3 +1,22 @@
+<!--
+PROVENANCE NOTE (added on branch fix/runnable, 2026-10-17). The table below is unchanged.
+This file is the output of ONE earlier run of `automate_layers.py` on the author's machine. Run date,
+host and options are not recorded (TODO author). What the code shows about these numbers:
+- "SMPC *" rows come from layer-2/layer2_smpc.py: a secure sum of 3 scalar public constants from
+  layer-1/shares.json (random metadata, not the Layer-1 shares). Before the automate_layers.py fix on fix/runnable the call always fell
+  back to ONE party (m=1). "SMPC Comm Bytes = 0" below agrees with that. The timer covers
+  mpc.start()..mpc.shutdown() for 5 outputs.
+- "Plaintext *" rows time a loop that only re-reads one Python variable (automate_layers.py:117-118).
+- "Overhead Exec Time (x)" = SMPC / that plaintext loop.
+- Ledger rows come from `peer chaincode invoke` CLI calls (automate_layers.py:232-376). TPS 26.95 and
+  Tx latency 0.583 s here differ from the paper's 42.86 TPS / 0.36 s. "Integrity OK = False" means the
+  final ReadAsset check did not match the hash.
+- Charts under "Publication Figures" (chart1-chart5) are drawn by save_check_charts(), which plots the
+  target values parsed from check.txt (0.0001 s, 0.0005 s, 42.86 TPS, 0.36 s, 47.33 s, 41.67 MB, 0.5 ms)
+  in preference to measured values. Chart5 is a linear extrapolation, not a measurement. Chart 4 uses
+  800 MB / 30 % fallbacks when no peer stats exist. These figures are NOT measurements.
+Re-measured results: see README.md and results/.
+-->
 | Metric | Value |
 | --- | --- |
 | SMPC Exec Time (s) | 0.0056 |
