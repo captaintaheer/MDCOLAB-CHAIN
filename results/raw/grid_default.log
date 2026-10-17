@@ -1,0 +1,8 @@
+default_n3_k10000 rc 0 3s ['n=3 k=10000 p_bits=64 ssl=False online mean=4.941ms median=4.784 p95=6.038 match=100/100 peakRSS=46.4MB']
+default_n4_k10000 rc 0 4s ['n=4 k=10000 p_bits=64 ssl=False online mean=5.819ms median=5.369 p95=7.473 match=100/100 peakRSS=47.3MB']
+default_n5_k10000 rc 0 7s ['n=5 k=10000 p_bits=64 ssl=False online mean=9.238ms median=8.548 p95=14.353 match=100/100 peakRSS=50.0MB']
+default_n6_k10000 rc 0 7s ['n=6 k=10000 p_bits=64 ssl=False online mean=9.203ms median=8.768 p95=12.468 match=100/100 peakRSS=51.2MB']
+default_n7_k10000 rc 0 9s ['n=7 k=10000 p_bits=64 ssl=False online mean=11.806ms median=11.472 p95=15.699 match=100/100 peakRSS=53.2MB']
+default_n8_k10000 rc 0 10s ['n=8 k=10000 p_bits=64 ssl=False online mean=12.275ms median=11.652 p95=17.032 match=100/100 peakRSS=62.0MB']
+default_n12_k10000 rc 0 23s ['n=12 k=10000 p_bits=64 ssl=False online mean=24.186ms median=24.415 p95=31.526 match=100/100 peakRSS=61.8MB']
+default_n16_k10000 rc 0 44s ['n=16 k=10000 p_bits=64 ssl=False online mean=40.990ms median=41.897 p95=54.323 match=100/100 peakRSS=69.8MB']

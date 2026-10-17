@@ -1,0 +1,1 @@
+{"tag": "default_n4_k10000", "n": 4, "k": 10000, "pid": 2, "peak_rss_mb": 47.2109375, "rss_after_start_mb": 40.0625, "bytes_sent_total": 44067826, "iterations": 110, "p": "9223372036854775907", "p_bits": 64, "ssl": false}

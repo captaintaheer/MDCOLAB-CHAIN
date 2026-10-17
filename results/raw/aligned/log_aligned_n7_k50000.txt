@@ -1,0 +1,7 @@
+python smpc_bench.py -M 7 --k 50000 --trials 100 --warmup 10 --tag aligned_n7_k50000 --out-dir results/raw/aligned --ssl --bits 224
+2026-10-17 15:02:58,489 Install package gmpy2 for better performance.
+2026-10-17 15:02:58,520 Start MPyC runtime v0.9
+2026-10-17 15:02:58,661 All 7 parties connected via SSL.
+2026-10-17 15:03:51,227 Stop MPyC -- elapsed time: 0:00:52.566|bytes sent: 1683330303
+n=7 k=50000 p_bits=256 ssl=True online mean=88.876ms median=85.825 p95=112.138 match=100/100 peakRSS=142.0MB
+
