@@ -24,9 +24,7 @@ Other files:
   (repeated runs of `layer2_smpc.py`).
 * `check.txt`: chart specification notes used by `automate_layers.py --save_check_charts`.
 * `metrics_report.md`: a report produced by `automate_layers.py`.
-* `tps.py`: TPS/latency sweep on the Fabric test network over arrival rates and endorser counts, using
-  the ledger functions in `automate_layers.py`; writes the charts to `output/charts/`. Requires a running
-  test network (§5).
+* `tps.py`: helper snippet that reads values from `metrics_report.md`.
 * `requirements.txt`: Python dependencies.
 
 ## 2. Requirements and setup
