@@ -377,21 +377,35 @@ def collect_ledger_metrics(base_dir, tx_count=5, mode='correctness', disable_pee
     if total_time > 0:
         tps = successes / total_time
     qlat = None
+    integrity_reason = 'no_successful_invoke'
     if last_asset_id:
         qcmd = [os.path.join(layer3_dir, '../bin/peer'), 'chaincode', 'query', '-C', 'mychannel', '-n', 'basic', '-c', json.dumps({"function":"ReadAsset","Args":[last_asset_id]})]
-        ts = time.perf_counter()
-        try:
-            res = subprocess.run(qcmd, cwd=layer3_dir, env=env, check=True, text=True, capture_output=True)
-            qlat = time.perf_counter() - ts
-            data = res.stdout.strip()
-            try:
-                obj = json.loads(data)
-                integrity_ok = _asset_matches_hash(obj, base_hash)
-            except Exception:
-                integrity_ok = False
-        except subprocess.CalledProcessError:
-            integrity_ok = False
-            qlat = None
+        # Read-back integrity check.  In throughput mode invokes are sent without --waitForEvent, so the
+        # last asset may not be committed yet when it is queried ("asset ... does not exist").  Poll until
+        # the asset is visible (or a timeout expires) and record why the check failed, instead of
+        # reporting a not-yet-committed asset as an integrity failure.
+        integrity_ok = False
+        deadline = time.perf_counter() + float(os.environ.get('READBACK_TIMEOUT_S', '15'))
+        attempts = 0
+        while True:
+            attempts += 1
+            ts = time.perf_counter()
+            res = subprocess.run(qcmd, cwd=layer3_dir, env=env, text=True, capture_output=True)
+            if res.returncode == 0:
+                qlat = time.perf_counter() - ts
+                try:
+                    obj = json.loads(res.stdout.strip())
+                    integrity_ok = _asset_matches_hash(obj, base_hash)
+                    integrity_reason = 'digest_match' if integrity_ok else 'digest_mismatch'
+                except Exception:
+                    integrity_reason = 'unparseable_asset'
+                break
+            if 'does not exist' in (res.stderr or '') and time.perf_counter() < deadline:
+                time.sleep(0.5)
+                continue
+            integrity_reason = 'query_failed: ' + (res.stderr or '').strip()[-200:]
+            break
+        print(f"[integrity] asset={last_asset_id} attempts={attempts} result={integrity_reason}")
     else:
         integrity_ok = False
     if not disable_peer_stats:
@@ -407,6 +421,7 @@ def collect_ledger_metrics(base_dir, tx_count=5, mode='correctness', disable_pee
         'peer_peak_cpu': peaks['cpu'],
         'peer_peak_mem_mb': peaks['mem_mb'],
         'integrity_ok': integrity_ok,
+        'integrity_reason': integrity_reason,
         'durations': durations
     }
 
@@ -509,6 +524,7 @@ def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None,
         {'Metric':'Peer Peak RAM (MB)','Value':round(ledger.get('peer_peak_mem_mb',0.0),2)},
         {'Metric':'End-to-End Latency (s)','Value':round(end_to_end,4)},
         {'Metric':'Integrity OK','Value':ledger.get('integrity_ok',False)},
+        {'Metric':'Integrity Check','Value':ledger.get('integrity_reason','')},
         {'Metric':'Stage','Value':stage},
         {'Metric':'Error','Value':error or ''}
     ]
@@ -867,7 +883,8 @@ def main():
                     {'Metric':'Peer Peak CPU (%)','Value':round(ledger.get('peer_peak_cpu',0.0),2)},
                     {'Metric':'Peer Peak RAM (MB)','Value':round(ledger.get('peer_peak_mem_mb',0.0),2)},
                     {'Metric':'End-to-End Latency (s)','Value':round(end_to_end,4)},
-                    {'Metric':'Integrity OK','Value':ledger.get('integrity_ok',False)}
+                    {'Metric':'Integrity OK','Value':ledger.get('integrity_ok',False)},
+                    {'Metric':'Integrity Check','Value':ledger.get('integrity_reason','')}
                 ]
                 md = render_markdown_table(rows)
                 print("\n===== AUTOMATION COMPLETE =====")
