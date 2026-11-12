@@ -196,6 +196,17 @@ File: `tables/table5_components.csv`
 
 * threshold rows use pipeline_bench.py -T t with n = 8.
 
+## Inter-node round-trip time (ICMP)
+
+File: `tables/rtt_summary.csv`
+
+| path | pairs | mean_of_pair_avg_ms | median_ms | min_pair_avg_ms | max_pair_avg_ms |
+|---|---|---|---|---|---|
+| smpc_to_smpc | 240 | 0.1510 | 0.1400 | 0.0900 | 0.3180 |
+| smpc_to_fabric_node | 16 | 0.2436 | 0.2145 | 0.1880 | 0.5000 |
+
+* Source: env/rtt_ping_fullmesh.txt; one line per ordered pair (20 pings).
+
 ## Correctness totals over all AWS runs
 
 File: `tables/correctness_totals.csv`

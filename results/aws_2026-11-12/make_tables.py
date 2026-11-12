@@ -197,6 +197,21 @@ t5 += [dict(group='threshold', **{k: r[k] for k in ('n', 't', 'k', 'latency_mean
 write('table5_components', t5, 'Component analysis, k = 10 000, BatchTimeout 2 s (Table V)',
       ['threshold rows use pipeline_bench.py -T t with n = 8.'])
 
+# ---------------------------------------------------------------- inter-node RTT (ICMP, 20 pings per ordered pair)
+ss, sf = [], []
+for line in open(os.path.join(ROOT, 'env', 'rtt_ping_fullmesh.txt')):
+    m = re.match(r'\[(\d+)\] <([\w-]+)> rtt min/avg/max/mdev = ([\d.]+)/([\d.]+)/([\d.]+)/([\d.]+) ms', line)
+    if not m:
+        continue
+    if m[2] == 'fabric-node':
+        sf.append(float(m[4]))
+    elif m[2] != f'smpc-node{int(m[1]):02d}':  # skip a node pinging itself
+        ss.append(float(m[4]))
+write('rtt_summary', [dict(path=p, pairs=len(a), mean_of_pair_avg_ms=float(np.mean(a)), median_ms=float(np.median(a)),
+                           min_pair_avg_ms=min(a), max_pair_avg_ms=max(a))
+                      for p, a in [('smpc_to_smpc', ss), ('smpc_to_fabric_node', sf)]],
+      'Inter-node round-trip time (ICMP)', ['Source: env/rtt_ping_fullmesh.txt; one line per ordered pair (20 pings).'])
+
 # ---------------------------------------------------------------- correctness totals
 allp = P02 + P2
 tot = dict(smpc_trials=sum(r['trials'] for r in smpc), smpc_oracle_match=sum(int(r['oracle_match'].split('/')[0]) for r in smpc),

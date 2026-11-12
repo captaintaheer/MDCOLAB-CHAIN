@@ -98,6 +98,10 @@ chk('Correctness trials (SMPC + pipeline)', 3100, int(tot['smpc_trials']) + int(
 chk('Correctness oracle matches', 3100, int(tot['smpc_oracle_match']) + int(tot['pipeline_oracle_match']), 0)
 chk('Pipeline read-back verified', 2300, tot['pipeline_readback_verified'], 0)
 
+rtt = {r['path']: r for r in T('rtt_summary')}
+chk('RTT SMPC to SMPC mean ms', 0.15, rtt['smpc_to_smpc']['mean_of_pair_avg_ms'], 2)
+chk('RTT SMPC to Fabric node mean ms', 0.244, rtt['smpc_to_fabric_node']['mean_of_pair_avg_ms'], 3)
+
 bad = [c for c in checks if not c[3]]
 for label, rep, comp, ok in checks:
     print(f"{'OK ' if ok else 'DIFF'} {label}: reported {rep}, computed {comp}")
