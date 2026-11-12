@@ -2,13 +2,14 @@
 """Summarise per-trial CSVs into results/smpc_summary_<profile>.csv (mean, SD, median, p95, p99 per stage)."""
 import csv, os, sys, numpy as np
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+results_dir = os.environ.get('MDCOLAB_RESULTS', os.path.join(root, 'results'))  # e.g. results/legacy/x86_2026-10-17
 stages = ['t_sharing_ms', 't_eval_ms', 't_recon_ms', 't_online_ms', 't_hash_ms', 't_verify_ms', 't_total_smpc_ms']
 for prof in sys.argv[1:] or ['aligned', 'default']:
-    f = os.path.join(root, 'results', f'smpc_trials_{prof}.csv')
+    f = os.path.join(results_dir, f'smpc_trials_{prof}.csv')
     if not os.path.exists(f):
         continue
     T = list(csv.DictReader(open(f)))
-    M = list(csv.DictReader(open(os.path.join(root, 'results', f'smpc_memory_{prof}.csv'))))
+    M = list(csv.DictReader(open(os.path.join(results_dir, f'smpc_memory_{prof}.csv'))))
     out = []
     for key in sorted({(int(r['n']), int(r['k'])) for r in T}, key=lambda x: (x[1], x[0])):
         R = [r for r in T if (int(r['n']), int(r['k'])) == key]
@@ -23,7 +24,7 @@ for prof in sys.argv[1:] or ['aligned', 'default']:
         row.update({'peak_rss_mb_party0': mem[0] if mem else '', 'peak_rss_mb_max': max(mem), 'peak_rss_mb_mean': np.mean(mem),
                     'bytes_sent_per_party_per_iter_mean': np.mean(byt)})
         out.append(row)
-    with open(os.path.join(root, 'results', f'smpc_summary_{prof}.csv'), 'w', newline='') as g:
+    with open(os.path.join(results_dir, f'smpc_summary_{prof}.csv'), 'w', newline='') as g:
         w = csv.DictWriter(g, fieldnames=list(out[0])); w.writeheader(); w.writerows(out)
     for r in out:
         print(f"{prof} n={r['n']:>2} k={r['k']:>6}  online {r['t_online_ms_mean']:.2f}±{r['t_online_ms_sd']:.2f} med {r['t_online_ms_median']:.2f} p95 {r['t_online_ms_p95']:.2f} | share {r['t_sharing_ms_mean']:.1f} eval {r['t_eval_ms_mean']:.2f} recon {r['t_recon_ms_mean']:.2f} hash {r['t_hash_ms_mean']:.2f} | total {r['t_total_smpc_ms_mean']:.1f} | RSS p0 {r['peak_rss_mb_party0']:.1f} max {r['peak_rss_mb_max']:.1f} | match {r['oracle_match']}/{r['N']}")

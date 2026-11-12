@@ -17,8 +17,9 @@ ap.add_argument('--trials', type=int, default=100)
 ap.add_argument('--warmup', type=int, default=10)
 a = ap.parse_args()
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+results_dir = os.environ.get('MDCOLAB_RESULTS', os.path.join(root, 'results'))  # e.g. results/legacy/x86_2026-10-17
 l2 = os.path.join(root, 'layer-2')
-raw = os.path.join(root, 'results', 'raw', a.profile)
+raw = os.path.join(results_dir, 'raw', a.profile)
 os.makedirs(raw, exist_ok=True)
 extra = ['--ssl', '--bits', '224'] if a.profile == 'aligned' else []
 for k in [int(x) for x in a.ks.split(',')]:
@@ -35,8 +36,8 @@ for k in [int(x) for x in a.ks.split(',')]:
 rows = []
 for f in sorted(glob.glob(os.path.join(raw, 'trials_*.csv'))):
     rows += list(csv.DictReader(open(f)))
-with open(os.path.join(root, 'results', f'smpc_trials_{a.profile}.csv'), 'w', newline='') as f:
+with open(os.path.join(results_dir, f'smpc_trials_{a.profile}.csv'), 'w', newline='') as f:
     w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
 mem = [json.load(open(f)) for f in sorted(glob.glob(os.path.join(raw, 'mem_*.json')))]
-with open(os.path.join(root, 'results', f'smpc_memory_{a.profile}.csv'), 'w', newline='') as f:
+with open(os.path.join(results_dir, f'smpc_memory_{a.profile}.csv'), 'w', newline='') as f:
     w = csv.DictWriter(f, fieldnames=list(mem[0])); w.writeheader(); w.writerows(mem)

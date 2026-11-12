@@ -2,7 +2,8 @@
 """Print markdown tables from results/*.csv (no numbers are typed by hand)."""
 import csv, os, numpy as np
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-R = lambda f: list(csv.DictReader(open(os.path.join(root, 'results', f)))) if os.path.exists(os.path.join(root, 'results', f)) else []
+results_dir = os.environ.get('MDCOLAB_RESULTS', os.path.join(root, 'results'))  # e.g. results/legacy/x86_2026-10-17
+R = lambda f: list(csv.DictReader(open(os.path.join(results_dir, f)))) if os.path.exists(os.path.join(results_dir, f)) else []
 f2 = lambda x, d=2: f"{float(x):.{d}f}"
 for prof in ['aligned', 'default']:
     S = R(f'smpc_summary_{prof}.csv')

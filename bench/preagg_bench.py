@@ -17,5 +17,6 @@ for n in [3, 4, 5, 6, 7, 8, 12, 16]:
                      'preagg_median_ms': np.median(ts), 'preagg_p95_ms': np.percentile(ts, 95), 'reps': len(ts)})
         print(rows[-1], flush=True)
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-with open(os.path.join(root, 'results', 'preagg_synthetic.csv'), 'w', newline='') as f:
+results_dir = os.environ.get('MDCOLAB_RESULTS', os.path.join(root, 'results'))  # e.g. results/legacy/x86_2026-10-17
+with open(os.path.join(results_dir, 'preagg_synthetic.csv'), 'w', newline='') as f:
     w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
