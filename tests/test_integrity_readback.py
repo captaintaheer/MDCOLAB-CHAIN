@@ -15,8 +15,11 @@ import automate_layers as al  # noqa: E402
 
 STUB = textwrap.dedent('''\
     #!/usr/bin/env python3
-    import json, os, sys
-    state = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'state.json')
+    import fcntl, json, os, sys
+    here = os.path.dirname(os.path.abspath(__file__))
+    state = os.path.join(here, 'state.json')
+    lock = open(os.path.join(here, 'state.lock'), 'w')
+    fcntl.flock(lock, fcntl.LOCK_EX)  # invokes run concurrently in throughput mode
     s = json.load(open(state)) if os.path.exists(state) else {'assets': {}, 'queries': 0}
     args = sys.argv[1:]
     call = json.loads(args[args.index('-c') + 1])
@@ -73,12 +76,14 @@ class ReadBackIntegrityTest(unittest.TestCase):
     def test_pending_commit_single_query_fails(self):
         # One query only (no waiting), as in the previous implementation: the asset is not yet visible.
         m = self.run_ledger(STUB_COMMIT_AFTER_QUERIES='3', READBACK_TIMEOUT_S='0')
+        self.assertEqual(m['tx_success_rate'], 1.0)
         self.assertFalse(m['integrity_ok'])
         self.assertTrue(m['integrity_reason'].startswith('query_failed'))
         self.assertEqual(m['query_latency'], 0.0)
 
     def test_pending_commit_polling_matches(self):
         m = self.run_ledger(STUB_COMMIT_AFTER_QUERIES='3', READBACK_TIMEOUT_S='15')
+        self.assertEqual(m['tx_success_rate'], 1.0)
         self.assertTrue(m['integrity_ok'])
         self.assertEqual(m['integrity_reason'], 'digest_match')
         self.assertGreater(m['query_latency'], 0.0)
