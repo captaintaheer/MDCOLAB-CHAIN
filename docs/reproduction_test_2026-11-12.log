@@ -1,0 +1,380 @@
+date: 2026-11-12 23:25:21 +08
+host: Linux 6.12.113+ x86_64, 8 CPUs
+
+$ git clone -q --branch revision/jait23816-repro /workspace/MDCOLAB-CHAIN MDCOLAB-CHAIN
+[exit status 0]
+
+$ git log -1 --format=%h %s
+e1a7572 test: serialise the stub peer CLI state between concurrent invokes
+[exit status 0]
+
+$ uv --version
+uv 0.13.7 (x86_64-unknown-linux-gnu)
+[exit status 0]
+
+$ uv venv -q -p 3.12 .venv
+[exit status 0]
+
+$ python -V
+Python 3.12.15
+[exit status 0]
+
+$ uv pip install -q -r requirements-lock.txt
+[exit status 0]
+
+$ uv pip freeze
+mpyc==0.9
+numpy==1.26.4
+psutil==7.2.2
+[exit status 0]
+
+## 1. online SMPC benchmark, 3 local parties
+
+$ python smpc_bench.py -M 3 --k 1000 --trials 5 --warmup 1 --seed 20261017 --tag demo_n3_k1000 --out-dir /tmp/fresh/out/smpc
+2026-11-12 23:25:22,428 Install package gmpy2 for better performance.
+2026-11-12 23:25:22,527 Start MPyC runtime v0.9
+2026-11-12 23:25:22,733 All 3 parties connected.
+2026-11-12 23:25:22,764 Stop MPyC -- elapsed time: 0:00:00.032|bytes sent: 183211
+n=3 k=1000 p_bits=64 ssl=False online mean=1.039ms median=0.994 p95=1.391 match=5/5 peakRSS=49.2MB
+[exit status 0]
+
+$ ls /tmp/fresh/out/smpc
+mem_demo_n3_k1000_p0.json
+mem_demo_n3_k1000_p1.json
+mem_demo_n3_k1000_p2.json
+trials_demo_n3_k1000.csv
+[exit status 0]
+
+$ head -3 /tmp/fresh/out/smpc/trials_demo_n3_k1000.csv
+tag,n,k,bits_l,p_bits,ssl,trial,t_sharing_ms,t_eval_ms,t_recon_ms,t_online_ms,t_hash_ms,t_verify_ms,t_total_smpc_ms,oracle_match,hash_ok
+demo_n3_k1000,3,1000,32,64,0,0,2.4337080012628576,0.23077100013324525,0.6606909992115106,0.8914619993447559,0.10588099939923268,0.00841899964143522,3.4394699996482814,1,1
+demo_n3_k1000,3,1000,32,64,0,1,2.359321999392705,0.20996300008846447,0.6075850014894968,0.8175480015779613,0.11729799916793127,0.009597000826033764,3.3037650009646313,1,1
+[exit status 0]
+
+## 2. pipeline benchmark without the ledger step, 3 local parties
+
+$ python harness/pipeline_bench.py -M 3 --k 1000 --trials 5 --warmup 1 --seed 20261017 --tag demo_pipe --out-dir /tmp/fresh/out/pipe
+2026-11-12 23:25:22,897 Install package gmpy2 for better performance.
+2026-11-12 23:25:22,929 Start MPyC runtime v0.9
+2026-11-12 23:25:23,136 All 3 parties connected.
+2026-11-12 23:25:23,175 Stop MPyC -- elapsed time: 0:00:00.039|bytes sent: 183223
+n=3 t=1 k=1000 preagg=on N=5 pipeline mean=4.8ms online mean=1.192ms match=5/5 fabric_ok=0 verified=0 peakRSS_p0=42.0MB
+[exit status 0]
+
+$ head -2 /tmp/fresh/out/pipe/trials_demo_pipe.csv
+tag,n,t,k,preagg,p_bits,ssl,trial,t_sharing_ms,t_eval_ms,t_recon_ms,t_online_ms,t_hash_ms,t_fabric_commit_ms,t_readback_verify_ms,t_pipeline_ms,t_plain_numpy_ms,fabric_ok,readback_verified,fabric_last_msg,oracle_match,bytes_sent_party0,rss_party0_mb
+demo_pipe,3,1,1000,on,64,0,0,3.839601999061415,0.21451999964483548,1.2417779998941114,1.456297999538947,0.019315000827191398,0.0,0.0,5.315214999427553,0.02145100006600842,,,,1,30474,41.91015625
+[exit status 0]
+
+## 3. integrity check tests (stub peer CLI)
+
+$ python -m unittest tests/test_integrity_readback.py -v
+test_pending_commit_polling_matches (tests.test_integrity_readback.ReadBackIntegrityTest.test_pending_commit_polling_matches) ... ok
+test_pending_commit_single_query_fails (tests.test_integrity_readback.ReadBackIntegrityTest.test_pending_commit_single_query_fails) ... ok
+test_tampered_value_is_detected (tests.test_integrity_readback.ReadBackIntegrityTest.test_tampered_value_is_detected) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.701s
+
+OK
+[exit status 0]
+
+## 4. rebuild the AWS tables and compare with the reported values
+
+$ python make_tables.py
+wrote 9 tables to /tmp/fresh/MDCOLAB-CHAIN/results/aws_2026-11-12/tables
+[exit status 0]
+
+$ git status --short .
+[exit status 0]
+
+$ python check_reported_values.py
+OK  Table I n=4 k=10000 online ms: reported 8.37, computed 8.37
+OK  Table I n=4 k=10000 memory MB: reported 47.14, computed 47.14
+OK  Table I n=4 k=50000 online ms: reported 42.21, computed 42.21
+OK  Table I n=4 k=50000 memory MB: reported 72.73, computed 72.73
+OK  Table I n=8 k=10000 online ms: reported 13.47, computed 13.47
+OK  Table I n=8 k=10000 memory MB: reported 54.41, computed 54.41
+OK  Table I n=8 k=50000 online ms: reported 65.01, computed 65.01
+OK  Table I n=8 k=50000 memory MB: reported 108.25, computed 108.25
+OK  Table I n=12 k=10000 online ms: reported 20.3, computed 20.3
+OK  Table I n=12 k=10000 memory MB: reported 61.28, computed 61.28
+OK  Table I n=12 k=50000 online ms: reported 110.04, computed 110.04
+OK  Table I n=12 k=50000 memory MB: reported 139.83, computed 139.83
+OK  Table I n=16 k=10000 online ms: reported 37.18, computed 37.18
+OK  Table I n=16 k=10000 memory MB: reported 69.2, computed 69.2
+OK  Table I n=16 k=50000 online ms: reported 175.13, computed 175.13
+OK  Table I n=16 k=50000 memory MB: reported 172.92, computed 172.92
+OK  Table I footnote min SD ms: reported 0.5, computed 0.5
+OK  Table I footnote max SD ms: reported 18.3, computed 18.3
+OK  Table I footnote max 95% CI ms: reported 3.6, computed 3.6
+OK  Table II Mean finality, lone transaction, BatchTimeout 0.2 s (s): reported 0.28, computed 0.28
+OK  Table II Mean finality, lone transaction, BatchTimeout 2 s (s): reported 2.08, computed 2.08
+OK  Table II Mean finality at 50 tx/s offered, BatchTimeout 0.2 s (s): reported 0.21, computed 0.21
+OK  Table II Committed throughput at 50 tx/s offered, BatchTimeout 0.2 s (TPS): reported 49.8, computed 49.8
+OK  Table II Committed throughput, 16 clients, BatchTimeout 0.2 s, max over offered loads (TPS): reported 56.7, computed 56.7
+OK  Table II Max committed throughput, majority, 2 orgs, 64 clients (TPS): reported 61.5, computed 61.5
+OK  Table II Max committed throughput, majority, 3 orgs, 64 clients (TPS): reported 60.1, computed 60.1
+OK  Table II Max committed throughput, 1-of-n endorsement, 2 orgs, 64 clients (TPS): reported 72.1, computed 72.1
+OK  Table II footnote finality SD, lone tx BT 0.2 s: reported 0.002, computed 0.002
+OK  Table II footnote finality SD, 50 tx/s BT 0.2 s: reported 0.058, computed 0.058
+OK  Table II footnote p95, lone tx BT 0.2 s: reported 0.28, computed 0.28
+OK  Table II footnote p95, 50 tx/s BT 0.2 s: reported 0.3, computed 0.3
+OK  Table II footnote p99, lone tx BT 0.2 s: reported 0.28, computed 0.28
+OK  Table II footnote p99, 50 tx/s BT 0.2 s: reported 0.31, computed 0.31
+OK  Figure 3 min finality s: reported 0.88, computed 0.88
+OK  Figure 3 max finality s: reported 1.08, computed 1.08
+OK  Table III n=4 k=10000 latency s (BT 0.2 s): reported 0.36, computed 0.36
+OK  Table III n=4 k=10000 latency s (BT 2 s): reported 2.16, computed 2.16
+OK  Table III n=4 k=10000 jobs/s: reported 2.76, computed 2.76
+OK  Table III n=4 k=10000 memory MB: reported 48.9, computed 48.9
+OK  Table III n=4 k=50000 latency s (BT 0.2 s): reported 0.52, computed 0.52
+OK  Table III n=4 k=50000 latency s (BT 2 s): reported 2.33, computed 2.33
+OK  Table III n=4 k=50000 jobs/s: reported 1.91, computed 1.91
+OK  Table III n=4 k=50000 memory MB: reported 76.2, computed 76.2
+OK  Table III n=4 k=100000 latency s (BT 0.2 s): reported 0.72, computed 0.72
+OK  Table III n=4 k=100000 latency s (BT 2 s): reported 2.53, computed 2.53
+OK  Table III n=4 k=100000 jobs/s: reported 1.38, computed 1.38
+OK  Table III n=4 k=100000 memory MB: reported 110.7, computed 110.7
+OK  Table III n=8 k=10000 latency s (BT 0.2 s): reported 0.42, computed 0.42
+OK  Table III n=8 k=10000 latency s (BT 2 s): reported 2.23, computed 2.23
+OK  Table III n=8 k=10000 jobs/s: reported 2.36, computed 2.36
+OK  Table III n=8 k=10000 memory MB: reported 56.6, computed 56.6
+OK  Table III n=8 k=50000 latency s (BT 0.2 s): reported 0.84, computed 0.84
+OK  Table III n=8 k=50000 latency s (BT 2 s): reported 2.64, computed 2.64
+OK  Table III n=8 k=50000 jobs/s: reported 1.19, computed 1.19
+OK  Table III n=8 k=50000 memory MB: reported 113.0, computed 113.0
+OK  Table III n=8 k=100000 latency s (BT 0.2 s): reported 1.36, computed 1.36
+OK  Table III n=8 k=100000 latency s (BT 2 s): reported 3.16, computed 3.16
+OK  Table III n=8 k=100000 jobs/s: reported 0.74, computed 0.74
+OK  Table III n=8 k=100000 memory MB: reported 187.8, computed 187.8
+OK  Table III n=12 k=10000 latency s (BT 0.2 s): reported 0.49, computed 0.49
+OK  Table III n=12 k=10000 latency s (BT 2 s): reported 2.3, computed 2.3
+OK  Table III n=12 k=10000 jobs/s: reported 2.02, computed 2.02
+OK  Table III n=12 k=10000 memory MB: reported 63.5, computed 63.5
+OK  Table III n=12 k=50000 latency s (BT 0.2 s): reported 1.19, computed 1.19
+OK  Table III n=12 k=50000 latency s (BT 2 s): reported 2.99, computed 2.99
+OK  Table III n=12 k=50000 jobs/s: reported 0.84, computed 0.84
+OK  Table III n=12 k=50000 memory MB: reported 147.4, computed 147.4
+OK  Table III n=16 k=10000 latency s (BT 0.2 s): reported 0.58, computed 0.58
+OK  Table III n=16 k=10000 latency s (BT 2 s): reported 2.38, computed 2.38
+OK  Table III n=16 k=10000 jobs/s: reported 1.74, computed 1.74
+OK  Table III n=16 k=10000 memory MB: reported 71.9, computed 71.9
+OK  Table III n=16 k=50000 latency s (BT 0.2 s): reported 1.58, computed 1.58
+OK  Table III n=16 k=50000 latency s (BT 2 s): reported 3.39, computed 3.39
+OK  Table III n=16 k=50000 jobs/s: reported 0.63, computed 0.63
+OK  Table III n=16 k=50000 memory MB: reported 182.2, computed 182.2
+OK  Table III footnote max latency SD s: reported 0.014, computed 0.014
+OK  Table III footnote commit s (BT 0.2 s): reported 0.28, computed 0.28
+OK  Table III footnote commit s (BT 2 s): reported 2.08, computed 2.08
+OK  Table III footnote read-back s: reported 0.04, computed 0.04
+OK  Table III footnote min sharing ms: reported 30, computed 30.0
+DIFF Table III footnote max sharing ms: reported 1105, computed 1104.0
+OK  Table III footnote min online ms: reported 8, computed 8.0
+OK  Table III footnote max online ms: reported 162, computed 162.0
+OK  Stage breakdown n=8 k=10000 sharing ms: reported 86.4, computed 86.4
+OK  Stage breakdown n=8 k=10000 online ms: reported 13.9, computed 13.9
+OK  Stage breakdown n=8 k=10000 hash ms: reported 0.1, computed 0.1
+OK  Stage breakdown n=8 k=10000 commit s: reported 0.28, computed 0.28
+OK  Stage breakdown n=8 k=10000 read-back ms: reported 44.3, computed 44.3
+OK  Stage breakdown n=8 k=10000 total s: reported 0.42, computed 0.42
+OK  Table V parties n=4 latency s: reported 2.16, computed 2.16
+OK  Table V parties n=4 memory MB: reported 48.6, computed 48.6
+OK  Table V parties n=8 latency s: reported 2.23, computed 2.23
+OK  Table V parties n=8 memory MB: reported 56.6, computed 56.6
+OK  Table V parties n=12 latency s: reported 2.3, computed 2.3
+OK  Table V parties n=12 memory MB: reported 63.2, computed 63.2
+OK  Table V parties n=16 latency s: reported 2.38, computed 2.38
+OK  Table V parties n=16 memory MB: reported 72.1, computed 72.1
+OK  Table V threshold t=1 latency s: reported 2.18, computed 2.18
+OK  Table V threshold t=1 memory MB: reported 54.0, computed 54.0
+OK  Table V threshold t=2 latency s: reported 2.2, computed 2.2
+OK  Table V threshold t=2 memory MB: reported 55.6, computed 55.6
+OK  Table V threshold t=3 latency s: reported 2.23, computed 2.23
+OK  Table V threshold t=3 memory MB: reported 56.5, computed 56.5
+OK  Table V baseline NumPy ms (n=8, k=10000, BT 0.2 s): reported 0.3, computed 0.3
+OK  Table V baseline MPyC without ledger ms (sharing + online): reported 100, computed 100.0
+OK  Bytes sent per party per trial, min MB: reported 0.4, computed 0.4
+OK  Bytes sent per party per trial, max MB: reported 11.0, computed 11.0
+OK  Bytes sent per party per trial, n=8 k=10000 MB: reported 1.0, computed 1.0
+OK  Correctness trials (SMPC + pipeline): reported 3100, computed 3100.0
+OK  Correctness oracle matches: reported 3100, computed 3100.0
+OK  Pipeline read-back verified: reported 2300, computed 2300.0
+OK  RTT SMPC to SMPC mean ms: reported 0.15, computed 0.15
+OK  RTT SMPC to Fabric node mean ms: reported 0.244, computed 0.244
+112/113 values match
+[exit status 1]
+
+## 5. legacy x86 tables
+
+$ python bench/make_tables.py
+
+#### Online SMPC time and memory, profile `aligned` (p = 256-bit, TLS = on; N = 100 after 10 warm-ups)
+
+| n | k | online mean ± SD (ms) | median | p95 | p99 | peak RSS party 0 (MB) | peak RSS max over parties (MB) | bytes sent / party / iter | oracle match |
+|---|---|---|---|---|---|---|---|---|---|
+| 3 | 10000 | 8.15 ± 0.73 | 7.98 | 9.57 | 9.84 | 53.5 | 53.8 | 1.02 MB | 100/100 |
+| 4 | 10000 | 8.76 ± 0.75 | 8.52 | 10.00 | 11.74 | 56.4 | 56.5 | 1.36 MB | 100/100 |
+| 5 | 10000 | 12.27 ± 1.99 | 12.00 | 15.28 | 20.26 | 60.9 | 60.9 | 2.04 MB | 100/100 |
+| 6 | 10000 | 12.20 ± 3.03 | 11.04 | 16.59 | 23.83 | 63.7 | 63.7 | 2.38 MB | 100/100 |
+| 7 | 10000 | 15.56 ± 4.32 | 14.11 | 23.35 | 35.32 | 66.7 | 67.1 | 3.06 MB | 100/100 |
+| 8 | 10000 | 17.44 ± 3.52 | 16.37 | 24.51 | 26.56 | 69.6 | 70.4 | 3.40 MB | 100/100 |
+| 12 | 10000 | 36.94 ± 9.51 | 38.33 | 50.82 | 54.64 | 84.1 | 84.2 | 5.44 MB | 100/100 |
+| 16 | 10000 | 57.93 ± 14.74 | 58.85 | 77.49 | 83.32 | 99.4 | 101.7 | 7.48 MB | 100/100 |
+| 3 | 50000 | 37.88 ± 3.33 | 36.88 | 43.00 | 51.09 | 86.5 | 86.6 | 5.10 MB | 100/100 |
+| 4 | 50000 | 43.25 ± 4.74 | 42.41 | 48.24 | 63.45 | 95.6 | 96.2 | 6.80 MB | 100/100 |
+| 5 | 50000 | 59.62 ± 8.23 | 56.97 | 77.26 | 92.39 | 114.1 | 114.1 | 10.20 MB | 100/100 |
+| 6 | 50000 | 68.16 ± 10.25 | 64.80 | 87.83 | 105.47 | 124.4 | 125.5 | 11.90 MB | 100/100 |
+| 7 | 50000 | 88.88 ± 15.45 | 85.83 | 112.14 | 147.85 | 142.0 | 142.0 | 15.30 MB | 100/100 |
+| 8 | 50000 | 96.89 ± 19.57 | 90.41 | 141.12 | 158.03 | 150.9 | 152.5 | 17.00 MB | 100/100 |
+| 12 | 50000 | 228.39 ± 53.89 | 241.88 | 309.63 | 318.67 | 196.5 | 207.8 | 27.20 MB | 100/100 |
+| 16 | 50000 | 353.72 ± 92.78 | 361.30 | 482.58 | 537.03 | 264.3 | 265.5 | 37.41 MB | 100/100 |
+| 3 | 100000 | 89.00 ± 7.58 | 88.29 | 103.17 | 109.15 | 126.1 | 126.1 | 10.20 MB | 100/100 |
+| 4 | 100000 | 95.06 ± 6.06 | 93.87 | 104.06 | 115.38 | 146.8 | 146.8 | 13.60 MB | 100/100 |
+| 5 | 100000 | 135.81 ± 18.24 | 131.61 | 175.81 | 202.28 | 177.2 | 179.1 | 20.40 MB | 100/100 |
+| 6 | 100000 | 122.13 ± 11.12 | 119.77 | 134.08 | 183.27 | 206.9 | 208.8 | 23.80 MB | 100/100 |
+| 7 | 100000 | 170.74 ± 41.33 | 155.85 | 262.31 | 349.72 | 233.7 | 239.6 | 30.60 MB | 100/100 |
+| 8 | 100000 | 191.76 ± 28.50 | 184.54 | 244.41 | 286.22 | 261.0 | 261.0 | 34.00 MB | 100/100 |
+| 12 | 100000 | 444.93 ± 91.17 | 467.14 | 561.76 | 604.74 | 361.3 | 373.8 | 54.41 MB | 100/100 |
+| 16 | 100000 | 690.02 ± 195.36 | 693.19 | 1021.15 | 1041.89 | 475.4 | 500.5 | 74.81 MB | 100/100 |
+
+#### Per-stage means ± SD (ms), profile `aligned` (Fabric stage not measurable here)
+
+| n | k | share gen + distribution | online eval | reconstruction | online (eval+recon) | SHA-256 commit | verification | total measured (sharing→verify) |
+|---|---|---|---|---|---|---|---|---|
+| 3 | 10000 | 20.09 ± 1.95 | 1.30 ± 0.11 | 6.85 ± 0.72 | 8.15 ± 0.73 | 0.62 ± 0.06 | 0.05 ± 0.00 | 28.91 ± 2.38 |
+| 4 | 10000 | 23.37 ± 1.33 | 1.97 ± 0.23 | 6.80 ± 0.73 | 8.76 ± 0.75 | 0.62 ± 0.10 | 0.05 ± 0.00 | 32.81 ± 1.78 |
+| 5 | 10000 | 41.43 ± 3.99 | 2.82 ± 0.36 | 9.45 ± 2.09 | 12.27 ± 1.99 | 0.63 ± 0.05 | 0.05 ± 0.00 | 54.39 ± 5.26 |
+| 6 | 10000 | 44.80 ± 4.54 | 3.31 ± 0.44 | 8.90 ± 3.00 | 12.20 ± 3.03 | 0.64 ± 0.06 | 0.05 ± 0.00 | 57.70 ± 6.91 |
+| 7 | 10000 | 63.63 ± 7.37 | 4.12 ± 0.61 | 11.44 ± 4.09 | 15.56 ± 4.32 | 0.65 ± 0.06 | 0.05 ± 0.00 | 79.90 ± 9.27 |
+| 8 | 10000 | 68.14 ± 6.03 | 4.83 ± 0.73 | 12.62 ± 3.72 | 17.44 ± 3.52 | 0.67 ± 0.15 | 0.05 ± 0.01 | 86.31 ± 8.11 |
+| 12 | 10000 | 188.71 ± 15.29 | 8.44 ± 2.79 | 28.51 ± 9.12 | 36.94 ± 9.51 | 0.67 ± 0.07 | 0.05 ± 0.01 | 226.38 ± 15.44 |
+| 16 | 10000 | 372.10 ± 18.53 | 11.55 ± 3.10 | 46.38 ± 14.77 | 57.93 ± 14.74 | 0.83 ± 0.80 | 0.06 ± 0.01 | 430.92 ± 16.75 |
+| 3 | 50000 | 100.70 ± 6.35 | 7.10 ± 1.36 | 30.78 ± 2.65 | 37.88 ± 3.33 | 2.99 ± 0.22 | 0.26 ± 0.02 | 141.83 ± 8.76 |
+| 4 | 50000 | 116.62 ± 5.24 | 11.25 ± 1.44 | 32.00 ± 3.86 | 43.25 ± 4.74 | 3.07 ± 0.35 | 0.27 ± 0.03 | 163.22 ± 8.22 |
+| 5 | 50000 | 216.47 ± 6.50 | 14.93 ± 1.56 | 44.68 ± 8.13 | 59.62 ± 8.23 | 3.04 ± 0.24 | 0.27 ± 0.02 | 279.40 ± 11.31 |
+| 6 | 50000 | 255.21 ± 14.64 | 19.51 ± 1.64 | 48.65 ± 10.32 | 68.16 ± 10.25 | 3.14 ± 0.25 | 0.27 ± 0.02 | 326.78 ± 21.05 |
+| 7 | 50000 | 354.39 ± 21.81 | 23.59 ± 2.53 | 65.29 ± 16.08 | 88.88 ± 15.45 | 3.25 ± 0.53 | 0.27 ± 0.03 | 446.79 ± 27.47 |
+| 8 | 50000 | 391.70 ± 20.81 | 28.05 ± 3.08 | 68.84 ± 21.02 | 96.89 ± 19.57 | 3.21 ± 0.35 | 0.27 ± 0.04 | 492.07 ± 25.52 |
+| 12 | 50000 | 995.35 ± 57.23 | 45.47 ± 11.84 | 182.92 ± 52.42 | 228.39 ± 53.89 | 3.38 ± 0.68 | 0.28 ± 0.03 | 1227.40 ± 52.08 |
+| 16 | 50000 | 1983.23 ± 104.80 | 84.23 ± 26.79 | 269.49 ± 84.81 | 353.72 ± 92.78 | 3.84 ± 1.37 | 0.40 ± 0.69 | 2341.20 ± 82.62 |
+| 3 | 100000 | 220.92 ± 11.31 | 15.81 ± 0.94 | 73.19 ± 7.32 | 89.00 ± 7.58 | 6.08 ± 0.33 | 0.60 ± 0.05 | 316.61 ± 13.13 |
+| 4 | 100000 | 273.53 ± 10.83 | 26.20 ± 1.76 | 68.86 ± 4.92 | 95.06 ± 6.06 | 6.32 ± 0.41 | 0.62 ± 0.05 | 375.53 ± 14.54 |
+| 5 | 100000 | 459.72 ± 21.96 | 31.52 ± 3.03 | 104.29 ± 17.74 | 135.81 ± 18.24 | 6.40 ± 0.63 | 0.63 ± 0.05 | 602.56 ± 32.77 |
+| 6 | 100000 | 496.46 ± 13.33 | 38.34 ± 1.77 | 83.79 ± 11.23 | 122.13 ± 11.12 | 6.22 ± 0.66 | 0.60 ± 0.05 | 625.41 ± 17.95 |
+| 7 | 100000 | 702.51 ± 51.80 | 44.92 ± 6.05 | 125.82 ± 39.79 | 170.74 ± 41.33 | 6.37 ± 0.56 | 0.62 ± 0.05 | 880.24 ± 79.84 |
+| 8 | 100000 | 745.91 ± 28.48 | 53.59 ± 3.83 | 138.17 ± 29.12 | 191.76 ± 28.50 | 6.38 ± 0.65 | 0.61 ± 0.04 | 944.66 ± 39.81 |
+| 12 | 100000 | 2005.91 ± 103.58 | 86.35 ± 17.01 | 358.58 ± 92.23 | 444.93 ± 91.17 | 6.56 ± 0.84 | 0.71 ± 0.52 | 2458.11 ± 103.98 |
+| 16 | 100000 | 4056.18 ± 255.50 | 198.85 ± 56.20 | 491.17 ± 169.73 | 690.02 ± 195.36 | 7.84 ± 2.84 | 0.73 ± 0.58 | 4754.77 ± 169.57 |
+
+#### Online SMPC time and memory, profile `default` (p = 64-bit, TLS = off; N = 100 after 10 warm-ups)
+
+| n | k | online mean ± SD (ms) | median | p95 | p99 | peak RSS party 0 (MB) | peak RSS max over parties (MB) | bytes sent / party / iter | oracle match |
+|---|---|---|---|---|---|---|---|---|---|
+| 3 | 10000 | 4.94 ± 0.63 | 4.78 | 6.04 | 7.09 | 46.4 | 46.4 | 0.30 MB | 100/100 |
+| 4 | 10000 | 5.82 ± 1.14 | 5.37 | 7.47 | 10.68 | 47.3 | 47.3 | 0.40 MB | 100/100 |
+| 5 | 10000 | 9.24 ± 2.32 | 8.55 | 14.35 | 14.80 | 50.0 | 50.0 | 0.60 MB | 100/100 |
+| 6 | 10000 | 9.20 ± 1.89 | 8.77 | 12.47 | 14.80 | 51.2 | 51.2 | 0.70 MB | 100/100 |
+| 7 | 10000 | 11.81 ± 2.05 | 11.47 | 15.70 | 17.25 | 53.2 | 53.2 | 0.90 MB | 100/100 |
+| 8 | 10000 | 12.27 ± 2.63 | 11.65 | 17.03 | 19.23 | 62.0 | 62.0 | 1.00 MB | 100/100 |
+| 12 | 10000 | 24.19 ± 4.72 | 24.41 | 31.53 | 33.71 | 61.8 | 62.1 | 1.60 MB | 100/100 |
+| 16 | 10000 | 40.99 ± 8.44 | 41.90 | 54.32 | 55.72 | 69.8 | 70.4 | 2.20 MB | 100/100 |
+
+#### Per-stage means ± SD (ms), profile `default` (Fabric stage not measurable here)
+
+| n | k | share gen + distribution | online eval | reconstruction | online (eval+recon) | SHA-256 commit | verification | total measured (sharing→verify) |
+|---|---|---|---|---|---|---|---|---|
+| 3 | 10000 | 17.38 ± 1.44 | 1.25 ± 0.17 | 3.69 ± 0.56 | 4.94 ± 0.63 | 0.65 ± 0.07 | 0.06 ± 0.01 | 23.02 ± 1.74 |
+| 4 | 10000 | 20.35 ± 1.70 | 1.92 ± 0.30 | 3.90 ± 1.12 | 5.82 ± 1.14 | 0.68 ± 0.13 | 0.06 ± 0.01 | 26.91 ± 2.47 |
+| 5 | 10000 | 41.86 ± 7.37 | 2.65 ± 0.46 | 6.59 ± 2.25 | 9.24 ± 2.32 | 0.68 ± 0.09 | 0.06 ± 0.01 | 51.83 ± 8.67 |
+| 6 | 10000 | 40.87 ± 2.98 | 3.18 ± 0.32 | 6.02 ± 1.91 | 9.20 ± 1.89 | 0.67 ± 0.08 | 0.06 ± 0.01 | 50.80 ± 4.00 |
+| 7 | 10000 | 59.94 ± 5.32 | 3.77 ± 0.46 | 8.03 ± 2.02 | 11.81 ± 2.05 | 0.69 ± 0.10 | 0.06 ± 0.01 | 72.49 ± 5.84 |
+| 8 | 10000 | 59.97 ± 6.65 | 4.04 ± 0.33 | 8.24 ± 2.63 | 12.27 ± 2.63 | 0.67 ± 0.05 | 0.05 ± 0.00 | 72.96 ± 7.65 |
+| 12 | 10000 | 163.51 ± 9.69 | 6.84 ± 1.42 | 17.35 ± 4.75 | 24.19 ± 4.72 | 0.67 ± 0.07 | 0.05 ± 0.01 | 188.41 ± 10.47 |
+| 16 | 10000 | 328.77 ± 18.48 | 10.54 ± 3.42 | 30.45 ± 8.71 | 40.99 ± 8.44 | 0.80 ± 0.60 | 0.07 ± 0.19 | 370.63 ± 18.59 |
+
+#### Unmodified `layer2_smpc.py` (3 public scalars, timer = mpc.start()..mpc.shutdown(), num_ops=5), 20 runs per m
+
+| parties m | Execution Time mean ± SD (ms) | median | p95 | Peak RAM mean (MB) | Comm bytes | results |
+|---|---|---|---|---|---|---|
+| 1 | 1.6 ± 0.1 | 1.6 | 1.8 | 40.71 | 0 | [26, 26, 26, 26, 26] |
+| 3 | 190.6 ± 28.2 | 195.9 | 213.8 | 41.44 | 110 | [26, 26, 26, 26, 26] |
+| 4 | 198.6 ± 22.8 | 200.9 | 215.8 | 41.43 | 110 | [26, 26, 26, 26, 26] |
+| 5 | 196.9 ± 13.9 | 193.6 | 216.0 | 41.43 | 220 | [26, 26, 26, 26, 26] |
+| 6 | 196.6 ± 7.7 | 195.4 | 210.9 | 41.44 | 220 | [26, 26, 26, 26, 26] |
+| 7 | 197.0 ± 12.0 | 193.6 | 217.0 | 41.45 | 330 | [26, 26, 26, 26, 26] |
+| 8 | 204.8 ± 30.0 | 195.4 | 246.6 | 41.43 | 330 | [26, 26, 26, 26, 26] |
+| 12 | 288.6 ± 16.7 | 289.8 | 309.3 | 41.69 | 550 | [26, 26, 26, 26, 26] |
+| 16 | 299.7 ± 27.9 | 288.9 | 358.0 | 44.17 | 770 | [26, 26, 26, 26, 26] |
+
+#### Synthetic pre-aggregation (party 0: 2504/n samples x k dosage matrix -> column sums), 25 reps
+
+| n | k | samples (party 0) | mean ± SD (ms) | median | p95 |
+|---|---|---|---|---|---|
+| 3 | 10000 | 835 | 3.96 ± 0.07 | 3.92 | 4.07 |
+| 3 | 50000 | 835 | 21.15 ± 0.18 | 21.06 | 21.48 |
+| 3 | 100000 | 835 | 32.01 ± 3.23 | 30.79 | 37.29 |
+| 4 | 10000 | 626 | 2.97 ± 0.07 | 2.93 | 3.09 |
+| 4 | 50000 | 626 | 15.83 ± 0.08 | 15.84 | 15.93 |
+| 4 | 100000 | 626 | 23.17 ± 0.96 | 22.60 | 24.51 |
+| 5 | 10000 | 501 | 2.41 ± 0.08 | 2.38 | 2.54 |
+| 5 | 50000 | 501 | 12.68 ± 0.08 | 12.64 | 12.82 |
+| 5 | 100000 | 501 | 17.74 ± 0.09 | 17.76 | 17.84 |
+| 6 | 10000 | 418 | 1.98 ± 0.06 | 1.96 | 2.10 |
+| 6 | 50000 | 418 | 10.59 ± 0.12 | 10.56 | 10.79 |
+| 6 | 100000 | 418 | 14.85 ± 0.12 | 14.84 | 15.06 |
+| 7 | 10000 | 358 | 1.70 ± 0.05 | 1.68 | 1.82 |
+| 7 | 50000 | 358 | 9.07 ± 0.11 | 9.07 | 9.13 |
+| 7 | 100000 | 358 | 12.68 ± 0.07 | 12.66 | 12.81 |
+| 8 | 10000 | 313 | 1.49 ± 0.05 | 1.47 | 1.61 |
+| 8 | 50000 | 313 | 7.95 ± 0.08 | 7.94 | 8.06 |
+| 8 | 100000 | 313 | 11.12 ± 0.07 | 11.12 | 11.25 |
+| 12 | 10000 | 209 | 0.99 ± 0.05 | 0.98 | 1.12 |
+| 12 | 50000 | 209 | 5.31 ± 0.07 | 5.29 | 5.42 |
+| 12 | 100000 | 209 | 7.64 ± 0.49 | 7.47 | 8.84 |
+| 16 | 10000 | 157 | 0.75 ± 0.04 | 0.73 | 0.82 |
+| 16 | 50000 | 157 | 4.01 ± 0.09 | 3.97 | 4.16 |
+| 16 | 100000 | 157 | 5.60 ± 0.08 | 5.61 | 5.71 |
+[exit status 0]
+
+## 6. Layer 3 readiness without Fabric
+
+$ python -c import automate_layers as al; print(al.layer3_script('.')); print(al.check_fabric('.'))
+./layer-3/blockchain.py
+['layer-3/fabric-samples/test-network not found (fabric-samples is not cloned)', 'layer-3/fabric-samples/bin/peer not found (Fabric binaries are not installed)', 'docker is not installed or not on PATH']
+[exit status 0]
+
+$ python layer-3/blockchain.py
+peer CLI not available: [Errno 2] No such file or directory: '/tmp/fresh/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/../bin/peer'
+[exit status 1]
+
+## 7. Figure 3 (optional matplotlib)
+
+$ uv pip install -q matplotlib
+[exit status 0]
+
+$ python results/aws_2026-11-12/make_fig3.py
+/tmp/fresh/MDCOLAB-CHAIN/results/aws_2026-11-12/figures/fig3_fabric.png
+Majority (baseline): 61.5 TPS, finality 1.03 s (bs10_bt2s_endorseMAJORITY_orgs2, rate100_e2_c64)
+1-of-n: 72.1 TPS, finality 0.88 s (bs10_bt2s_endorseANY_orgs2, rate100_e1_c64)
+Block 10: 61.5 TPS, finality 1.03 s (bs10_bt2s_endorseMAJORITY_orgs2, rate100_e2_c64)
+Block 30: 60.6 TPS, finality 1.05 s (bs30_bt2s_endorseMAJORITY_orgs2, rate100_e2_c64)
+Block 50: 59.0 TPS, finality 1.08 s (bs50_bt2s_endorseMAJORITY_orgs2, rate100_e2_c64)
+Orgs 2: 61.5 TPS, finality 1.03 s (bs10_bt2s_endorseMAJORITY_orgs2, rate100_e2_c64)
+Orgs 3: 60.1 TPS, finality 1.06 s (bs10_bt2s_endorseMAJORITY_orgs3, rate100_e2_c64)
+[exit status 0]
+
+## 8. tps.py without Fabric (after installing matplotlib)
+
+$ bash tps.py
+Fabric test-network not available, chart drawn with zero values:
+  - layer-3/fabric-samples/test-network not found (fabric-samples is not cloned)
+  - layer-3/fabric-samples/bin/peer not found (Fabric binaries are not installed)
+  - docker is not installed or not on PATH
+OK
+/tmp/fresh/MDCOLAB-CHAIN/output/charts/chart6_tps_latency_multi.png True
+/tmp/fresh/MDCOLAB-CHAIN/output/charts/chart6_tps_latency_multi.txt True
+[exit status 0]
+
+$ git status --short
+[exit status 0]
