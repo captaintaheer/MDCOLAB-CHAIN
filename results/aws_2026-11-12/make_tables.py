@@ -66,7 +66,8 @@ def write(name, rows, title, notes=()):
     with open(os.path.join(OUT, name + '.csv'), 'w', newline='') as f:
         w = csv.DictWriter(f, fieldnames=keys, lineterminator='\n')
         w.writeheader()
-        w.writerows(rows)
+        # 10 significant digits: removes last-bit differences between runs of NumPy reductions
+        w.writerows([{k: (f'{v:.10g}' if isinstance(v, float) else v) for k, v in r.items()} for r in rows])
     md = [f'## {title}', '', f'File: `tables/{name}.csv`', '', '| ' + ' | '.join(keys) + ' |', '|' + '---|' * len(keys)]
     for r in rows:
         md.append('| ' + ' | '.join(fmt(r.get(k, '')) for k in keys) + ' |')
