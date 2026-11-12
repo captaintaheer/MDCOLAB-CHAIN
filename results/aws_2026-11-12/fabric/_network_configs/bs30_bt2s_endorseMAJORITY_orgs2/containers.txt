@@ -1,0 +1,5 @@
+dev-peer0.org2.example.com-basic_1.0-1f66cc610fb8ac88d69e78edc4c1cb09bac7c839fb5399009310ac8dfa703799 dev-peer0.org2.example.com-basic_1.0-1f66cc610fb8ac88d69e78edc4c1cb09bac7c839fb5399009310ac8dfa703799-77f4314a0214359a817dc282f148d1d72ce27da08c59102dc659741e9ed3349f
+dev-peer0.org1.example.com-basic_1.0-1f66cc610fb8ac88d69e78edc4c1cb09bac7c839fb5399009310ac8dfa703799 dev-peer0.org1.example.com-basic_1.0-1f66cc610fb8ac88d69e78edc4c1cb09bac7c839fb5399009310ac8dfa703799-8f4296b79b03dc5e553784fa18a614f0c6e41f74be802b7338869e17a94c1367
+orderer.example.com hyperledger/fabric-orderer:latest
+peer0.org2.example.com hyperledger/fabric-peer:latest
+peer0.org1.example.com hyperledger/fabric-peer:latest

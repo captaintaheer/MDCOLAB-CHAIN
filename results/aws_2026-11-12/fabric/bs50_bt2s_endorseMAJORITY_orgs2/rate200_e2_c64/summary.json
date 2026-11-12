@@ -1,0 +1,20 @@
+{
+ "tag": "bs50_bt2s_endorseMAJORITY_orgs2_r200_e2_c64",
+ "rate_offered": 200.0,
+ "duration_s": 60.0,
+ "concurrency": 64,
+ "endorsers": 2,
+ "submitted": 12000,
+ "valid": 12000,
+ "invalid_or_error": 0,
+ "window_s": 205.67104983329773,
+ "tps_committed": 58.34559608523583,
+ "submit_rate_achieved": 58.52016774800734,
+ "finality_mean_s": 1.0952022195061049,
+ "finality_median_s": 0.8940205574035645,
+ "finality_p95_s": 1.7504732608795166,
+ "start": "2026-11-12T19:15:26+08:00",
+ "statuses": {
+  "VALID": 12000
+ }
+}

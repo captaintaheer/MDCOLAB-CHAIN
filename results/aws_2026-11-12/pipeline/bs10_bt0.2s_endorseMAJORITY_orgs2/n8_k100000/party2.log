@@ -1,0 +1,4 @@
+2026-11-12 18:13:24,981 Install package gmpy2 for better performance.
+2026-11-12 18:13:25,009 Start MPyC runtime v0.9
+2026-11-12 18:13:25,082 All 8 parties connected.
+2026-11-12 18:16:04,851 Stop MPyC -- elapsed time: 0:02:39.769|bytes sent: 1100121160

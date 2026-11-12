@@ -1,0 +1,1 @@
+7f0f4a2 (fabric-samples HEAD in the repo copy shipped to AWS: 'Bump the go_modules group across 17 directories with 2 updates (#1342)')

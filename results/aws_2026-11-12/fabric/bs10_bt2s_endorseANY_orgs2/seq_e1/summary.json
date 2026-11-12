@@ -1,0 +1,20 @@
+{
+ "tag": "bs10_bt2s_endorseANY_orgs2_seq_e1",
+ "rate_offered": 0.0,
+ "duration_s": null,
+ "concurrency": 1,
+ "endorsers": 1,
+ "submitted": 100,
+ "valid": 100,
+ "invalid_or_error": 0,
+ "window_s": 207.5775604248047,
+ "tps_committed": 0.4817476407148795,
+ "submit_rate_achieved": 0.4817447109562567,
+ "finality_mean_s": 2.075713062286377,
+ "finality_median_s": 2.07503604888916,
+ "finality_p95_s": 2.0798213481903076,
+ "start": "2026-11-12T19:24:23+08:00",
+ "statuses": {
+  "VALID": 100
+ }
+}

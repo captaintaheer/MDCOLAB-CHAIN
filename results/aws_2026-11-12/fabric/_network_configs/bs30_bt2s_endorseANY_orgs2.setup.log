@@ -1,0 +1,23 @@
+tee: /proc/sys/net/bridge/bridge-nf-call-iptables: No such file or directory
+[0;34mUsing organization 1[0m
+{
+  "batch_timeout": {
+    "timeout": "2s"
+  },
+  "batch_size": {
+    "absolute_max_bytes": 103809024,
+    "max_message_count": 30,
+    "preferred_max_bytes": 524288
+  },
+  "orgs": [
+    "Org1MSP",
+    "Org2MSP"
+  ],
+  "app_endorsement": {
+    "type": 3,
+    "value": {
+      "rule": "MAJORITY",
+      "sub_policy": "Endorsement"
+    }
+  }
+}

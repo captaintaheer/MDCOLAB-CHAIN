@@ -1,0 +1,61 @@
+instance_id: <instance-id>
+instance_type: c6i.large
+ami_id: <custom-ami-id>
+az: ap-southeast-1a
+az_id: apse1-az2
+placement_group: mdcolab-jait23816-pg
+private_ip: <smpc-node11>
+nproc: 2
+free:                total        used        free      shared  buff/cache   available
+free: Mem:            3812         506        3082           2         457        3305
+free: Swap:              0           0           0
+lscpu: Architecture:                            x86_64
+lscpu: CPU op-mode(s):                          32-bit, 64-bit
+lscpu: Address sizes:                           46 bits physical, 48 bits virtual
+lscpu: Byte Order:                              Little Endian
+lscpu: CPU(s):                                  2
+lscpu: On-line CPU(s) list:                     0,1
+lscpu: Vendor ID:                               GenuineIntel
+lscpu: Model name:                              Intel(R) Xeon(R) Platinum 8375C CPU @ 2.90GHz
+lscpu: CPU family:                              6
+lscpu: Model:                                   106
+lscpu: Thread(s) per core:                      2
+lscpu: Core(s) per socket:                      1
+lscpu: Socket(s):                               1
+lscpu: Stepping:                                6
+lscpu: BogoMIPS:                                5799.88
+lscpu: Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves wbnoinvd ida arat avx512vbmi pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid md_clear flush_l1d arch_capabilities
+lscpu: Hypervisor vendor:                       KVM
+lscpu: Virtualization type:                     full
+lscpu: L1d cache:                               48 KiB (1 instance)
+lscpu: L1i cache:                               32 KiB (1 instance)
+lscpu: L2 cache:                                1.3 MiB (1 instance)
+lscpu: L3 cache:                                54 MiB (1 instance)
+lscpu: NUMA node(s):                            1
+lscpu: NUMA node0 CPU(s):                       0,1
+lscpu: Vulnerability Gather data sampling:      Unknown: Dependent on hypervisor status
+lscpu: Vulnerability Ghostwrite:                Not affected
+lscpu: Vulnerability Indirect target selection: Mitigation; Aligned branch/return thunks
+lscpu: Vulnerability Itlb multihit:             Not affected
+lscpu: Vulnerability L1tf:                      Not affected
+lscpu: Vulnerability Mds:                       Not affected
+lscpu: Vulnerability Meltdown:                  Not affected
+lscpu: Vulnerability Mmio stale data:           Mitigation; Clear CPU buffers; SMT Host state unknown
+lscpu: Vulnerability Old microcode:             Not affected
+lscpu: Vulnerability Reg file data sampling:    Not affected
+lscpu: Vulnerability Retbleed:                  Not affected
+lscpu: Vulnerability Spec rstack overflow:      Not affected
+lscpu: Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+lscpu: Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+lscpu: Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop
+lscpu: Vulnerability Srbds:                     Not affected
+lscpu: Vulnerability Tsa:                       Not affected
+lscpu: Vulnerability Tsx async abort:           Not affected
+lscpu: Vulnerability Vmscape:                   Not affected
+os: Ubuntu 24.04.5 LTS
+kernel: 7.0.0-1014-aws
+python: Python 3.12.3
+pip: mpyc==0.9
+pip: numpy==1.26.4
+pip: psutil==7.2.2
+docker: Docker version 29.1.3, build 29.1.3-0ubuntu3~24.04.2

@@ -1,0 +1,6 @@
+$ /home/ubuntu/venv/bin/python pipeline_bench.py -P <fabric-node>:11366 -P <smpc-node00>:11366 -P <smpc-node01>:11366 -P <smpc-node02>:11366 -P <smpc-node03>:11366 -P <smpc-node04>:11366 -P <smpc-node05>:11366 -P <smpc-node06>:11366 -P <smpc-node07>:11366 -P <smpc-node08>:11366 -P <smpc-node09>:11366 -P <smpc-node10>:11366 --k 50000 --trials 100 --warmup 10 --seed 20261017 --fabric --tag pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n12_k50000 --out-dir /home/ubuntu/run/out/pipeline_aws/bs10_bt0.2s_endorseMAJORITY_orgs2/n12_k50000 -I 0
+2026-11-12 18:17:17,858 Install package gmpy2 for better performance.
+2026-11-12 18:17:17,888 Start MPyC runtime v0.9
+2026-11-12 18:17:17,893 All 12 parties connected.
+2026-11-12 18:19:36,820 Stop MPyC -- elapsed time: 0:02:18.927|bytes sent: 880260322
+n=12 t=5 k=50000 preagg=on N=100 pipeline mean=1187.0ms online mean=109.786ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=147.4MB
