@@ -26,12 +26,20 @@ sys.path.append(base_dir)
 import automate_layers as al
 rates = [50, 100, 150, 200, 250]
 counts = [1, 2, 3]
-try:
-    sweep = al.run_tps_latency_sweep(base_dir, rates, counts)
-except Exception as e:
+zeros = {c: [{'arrival': r, 'tps': 0.0, 'lat': 0.0} for r in rates] for c in counts}
+problems = al.check_fabric(base_dir, need_script=False)
+if problems:
     # No usable Fabric network: draw the chart with zero values so the plotting path can still be checked.
-    print(f'TPS sweep did not run ({type(e).__name__}: {e}); chart drawn with zero values')
-    sweep = {c: [{'arrival': r, 'tps': 0.0, 'lat': 0.0} for r in rates] for c in counts}
+    print('Fabric test-network not available, chart drawn with zero values:')
+    for p in problems:
+        print('  -', p)
+    sweep = zeros
+else:
+    try:
+        sweep = al.run_tps_latency_sweep(base_dir, rates, counts)
+    except Exception as e:
+        print(f'TPS sweep did not run ({type(e).__name__}: {e}); chart drawn with zero values')
+        sweep = zeros
 ok = al.save_tps_latency_chart(base_dir, sweep)
 print('OK' if ok else 'FAIL')
 for ext in ('png', 'txt'):
