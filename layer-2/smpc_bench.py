@@ -32,7 +32,7 @@ ap.add_argument('--trials', type=int, default=100)
 ap.add_argument('--warmup', type=int, default=10)
 ap.add_argument('--bits', type=int, default=None, help='SecInt bit length l (default: MPyC default, 32)')
 ap.add_argument('--seed', type=int, default=20261017)
-ap.add_argument('--out-dir', default='../results/raw/aligned')
+ap.add_argument('--out-dir', default='../output/smpc_bench')
 ap.add_argument('--tag', default='run')
 args, _ = ap.parse_known_args()   # MPyC parses its own options (-M, -I, --ssl, ...)
 
