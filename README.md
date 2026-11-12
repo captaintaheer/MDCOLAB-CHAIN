@@ -139,8 +139,13 @@ in a new environment.
 
 `automate_layers.py` runs Layers 1 to 3 in sequence and writes a Markdown report with charts:
 
+The FASTA input is not part of the repository (`data/` is ignored by git). The phiX174 reference
+genome (NCBI accession NC_001422.1) is a small example input:
+
 ```bash
-python automate_layers.py --genome data/<file>.fna --allow_multi_smpc --smpc_parties 3 --report_path output/report.md
+mkdir -p data
+curl -sS "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NC_001422.1&rettype=fasta&retmode=text" -o data/phiX174.fna
+python automate_layers.py --genome data/phiX174.fna --allow_multi_smpc --smpc_parties 3 --report_path output/report.md
 ```
 
 | Flag | Default | Meaning |
@@ -159,7 +164,7 @@ python automate_layers.py --genome data/<file>.fna --allow_multi_smpc --smpc_par
 | `--disable_peer_stats` | off | skip peer CPU/memory sampling |
 | `--fast_e2e` | off | shorter end-to-end run |
 | `--save_check_charts` | off | also draw the comparison charts defined in `check.txt` |
-| `--tps_latency_sweep` | off | TPS/latency sweep over `--tps_latency_rates` and `--endorser_counts` |
+| `--tps_latency_sweep` | off | TPS/latency sweep over `--tps_latency_rates` (default 50,100,150,200,250) and `--endorser_counts` (default 1,2,3) with `--sweep_concurrency` clients (default 16) |
 
 `READBACK_TIMEOUT_S` (default 15) sets how long the final read-back waits for the last asset to be
 committed ([docs/INTEGRITY_CHECK.md](docs/INTEGRITY_CHECK.md)). `bash tps.py` runs the TPS/latency
