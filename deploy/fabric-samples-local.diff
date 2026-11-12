@@ -1,0 +1,32 @@
+diff --git a/test-network/addOrg3/compose/docker/docker-compose-org3.yaml b/test-network/addOrg3/compose/docker/docker-compose-org3.yaml
+index 12c9ea7..08396c9 100644
+--- a/test-network/addOrg3/compose/docker/docker-compose-org3.yaml
++++ b/test-network/addOrg3/compose/docker/docker-compose-org3.yaml
+@@ -20,6 +20,7 @@ services:
+       #Generic peer variables
+       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
++      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:2.5.12
+     volumes:
+       - ./docker/peercfg:/etc/hyperledger/peercfg
+       - ${DOCKER_SOCK}:/host/var/run/docker.sock
+diff --git a/test-network/compose/docker/docker-compose-test-net.yaml b/test-network/compose/docker/docker-compose-test-net.yaml
+index 421d8e0..abe17e5 100644
+--- a/test-network/compose/docker/docker-compose-test-net.yaml
++++ b/test-network/compose/docker/docker-compose-test-net.yaml
+@@ -14,6 +14,7 @@ services:
+       #Generic peer variables
+       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
++      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:2.5.12
+     volumes:
+       - ./docker/peercfg:/etc/hyperledger/peercfg
+       - ${DOCKER_SOCK}:/host/var/run/docker.sock
+@@ -27,6 +28,7 @@ services:
+       #Generic peer variables
+       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
++      - CORE_CHAINCODE_BUILDER=hyperledger/fabric-ccenv:2.5.12
+     volumes:
+       - ./docker/peercfg:/etc/hyperledger/peercfg
+       - ${DOCKER_SOCK}:/host/var/run/docker.sock
