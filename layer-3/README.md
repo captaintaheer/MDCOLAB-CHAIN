@@ -19,4 +19,9 @@ cd test-network
 ./network.sh deployCC -ccn basic -ccp ../asset-transfer-basic/chaincode-go -ccl go
 ```
 
-`automate_layers.py` runs `test-network/blockchain.py` in this working copy. See the top-level README §5.
+`automate_layers.py` runs `test-network/blockchain.py` if the working copy has one, otherwise
+`layer-3/blockchain.py`, which checks that the `basic` chaincode is committed on `mychannel`.
+The test-network location can be overridden with `FABRIC_TEST_NETWORK`.
+
+The AWS run used two local changes to the fabric-samples working copy; they are in
+[`deploy/fabric-samples-local.diff`](../deploy/fabric-samples-local.diff) and described in the top-level README.

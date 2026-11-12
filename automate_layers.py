@@ -77,6 +77,17 @@ def run_layer2(base_dir):
     cmd = [sys.executable, script_path]
     return run_command(cmd, cwd=layer2_dir)
 
+def layer3_script(base_dir):
+    """
+    Return the Layer 3 script: test-network/blockchain.py in the fabric-samples working copy if present,
+    otherwise the readiness check shipped in layer-3/blockchain.py.
+    """
+    for p in (os.path.join(base_dir, "layer-3", "fabric-samples", "test-network", "blockchain.py"),
+              os.path.join(base_dir, "layer-3", "blockchain.py")):
+        if os.path.exists(p):
+            return p
+    return None
+
 def check_fabric(base_dir, need_script=True):
     """
     Return a list of reasons why the Fabric test network cannot be used (empty if it looks usable).
@@ -85,8 +96,8 @@ def check_fabric(base_dir, need_script=True):
     layer3_dir = os.path.join(base_dir, "layer-3", "fabric-samples", "test-network")
     if not os.path.isdir(layer3_dir):
         problems.append(f"{os.path.relpath(layer3_dir, base_dir)} not found (fabric-samples is not cloned)")
-    elif need_script and not os.path.exists(os.path.join(layer3_dir, "blockchain.py")):
-        problems.append(f"{os.path.relpath(os.path.join(layer3_dir, 'blockchain.py'), base_dir)} not found")
+    elif need_script and layer3_script(base_dir) is None:
+        problems.append("no Layer 3 script found (layer-3/fabric-samples/test-network/blockchain.py or layer-3/blockchain.py)")
     peer_bin = os.path.join(base_dir, "layer-3", "fabric-samples", "bin", "peer")
     if not os.path.exists(peer_bin):
         problems.append(f"{os.path.relpath(peer_bin, base_dir)} not found (Fabric binaries are not installed)")
@@ -105,7 +116,6 @@ def run_layer3(base_dir):
     """
     print("\n===== LAYER 3: BLOCKCHAIN INTEGRATION =====")
     layer3_dir = os.path.join(base_dir, "layer-3", "fabric-samples", "test-network")
-    script_path = os.path.join(layer3_dir, "blockchain.py")
     problems = check_fabric(base_dir)
     if problems:
         print("Hyperledger Fabric is not available, so Layer 3 cannot run:")
@@ -115,8 +125,9 @@ def run_layer3(base_dir):
         return False
     
     # Run the script
-    cmd = [sys.executable, script_path]
-    return run_command(cmd, cwd=layer3_dir)
+    env = dict(os.environ, FABRIC_TEST_NETWORK=os.environ.get('FABRIC_TEST_NETWORK', layer3_dir))
+    cmd = [sys.executable, layer3_script(base_dir)]
+    return run_command(cmd, cwd=layer3_dir, env=env)
 
 def parse_smpc_output(output):
     metrics = {}
@@ -170,7 +181,6 @@ def find_mpyc_python(base_dir, override=None):
         sys.executable,
         os.path.join(base_dir, 'venv', 'bin', 'python3'),
         os.path.join(base_dir, 'venv', 'bin', 'python'),
-        os.path.join(os.path.dirname(base_dir), 'AGENTS', 'chatbot-poc', 'myenv', 'bin', 'python'),
         'python3',
         'python'
     ])
