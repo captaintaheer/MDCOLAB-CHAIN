@@ -1,0 +1,9 @@
+metric,value,config,run,submitted,valid,finality_sd_s,finality_p95_s,finality_p99_s
+"Mean finality, lone transaction, BatchTimeout 0.2 s (s)",0.2797091532,bs10_bt0.2s_endorseMAJORITY_orgs2,seq_e2,100,100,0.002012408221,0.2825543642,0.2831413031
+"Mean finality, lone transaction, BatchTimeout 2 s (s)",2.080735147,bs10_bt2s_endorseMAJORITY_orgs2,seq_e2,100,100,0.002380260328,2.084046435,2.084478564
+"Mean finality at 50 tx/s offered, BatchTimeout 0.2 s (s)",0.206065349,bs10_bt0.2s_endorseMAJORITY_orgs2,rate50_e2,3000,3000,0.05784290921,0.2951089144,0.306233077
+"Committed throughput at 50 tx/s offered, BatchTimeout 0.2 s (TPS)",49.78701982,bs10_bt0.2s_endorseMAJORITY_orgs2,rate50_e2,3000,3000,0.05784290921,0.2951089144,0.306233077
+"Committed throughput, 16 clients, BatchTimeout 0.2 s, max over offered loads (TPS)",56.70858459,bs10_bt0.2s_endorseMAJORITY_orgs2,rate100_e2,6000,6000,0.08637916553,0.3618402719,0.3673972559
+"Max committed throughput, majority, 2 orgs, 64 clients (TPS)",61.54429835,bs10_bt2s_endorseMAJORITY_orgs2,rate100_e2_c64,6000,6000,0.2398398348,1.42415781,1.535394349
+"Max committed throughput, majority, 3 orgs, 64 clients (TPS)",60.08342037,bs10_bt2s_endorseMAJORITY_orgs3,rate100_e2_c64,6000,6000,0.269413657,1.499219716,1.648557909
+"Max committed throughput, 1-of-n endorsement, 2 orgs, 64 clients (TPS)",72.14066113,bs10_bt2s_endorseANY_orgs2,rate150_e1_c64,9000,9000,0.2248732858,1.242799199,1.373352268

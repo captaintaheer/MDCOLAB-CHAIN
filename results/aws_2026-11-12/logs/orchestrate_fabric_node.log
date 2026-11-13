@@ -1,0 +1,155 @@
+[2026-11-12 17:12:15 +08] START
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n4-k100000 rc 0 284.8s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n4_k100000 files=11 n=4 t=1 k=100000 preagg=on N=100 pipeline mean=2528.9ms online mean=91.143ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=110.7MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n8-k10000 rc 0 246.6s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n8_k10000 files=19 n=8 t=3 k=10000 preagg=on N=100 pipeline mean=2226.9ms online mean=14.096ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=56.6MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n8-k50000 rc 0 296.5s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n8_k50000 files=19 n=8 t=3 k=50000 preagg=on N=100 pipeline mean=2642.4ms online mean=78.325ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=113.6MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n8-k100000 rc 0 358.8s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n8_k100000 files=19 n=8 t=3 k=100000 preagg=on N=100 pipeline mean=3159.3ms online mean=163.119ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=185.8MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n12-k10000 rc 0 254.9s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n12_k10000 files=27 n=12 t=5 k=10000 preagg=on N=100 pipeline mean=2296.2ms online mean=20.246ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=63.2MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n12-k50000 rc 0 337.9s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n12_k50000 files=27 n=12 t=5 k=50000 preagg=on N=100 pipeline mean=2992.6ms online mean=111.120ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=148.5MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n16-k10000 rc 0 264.5s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n16_k10000 files=35 n=16 t=7 k=10000 preagg=on N=100 pipeline mean=2378.5ms online mean=29.103ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=72.1MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n16-k50000 rc 0 384.9s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n16_k50000 files=35 n=16 t=7 k=50000 preagg=on N=100 pipeline mean=3393.7ms online mean=151.251ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=181.4MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n8-k10000_t1 rc 0 241.4s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n8_k10000_t1 files=19 n=8 t=1 k=10000 preagg=on N=100 pipeline mean=2180.1ms online mean=11.439ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=54.0MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n8-k10000_t2 rc 0 244.0s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n8_k10000_t2 files=19 n=8 t=2 k=10000 preagg=on N=100 pipeline mean=2203.3ms online mean=12.576ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=55.6MB
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n8-k10000_t3 rc 0 246.5s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n8_k10000_t3 files=19 n=8 t=3 k=10000 preagg=on N=100 pipeline mean=2225.7ms online mean=14.119ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=56.5MB
+[2026-11-12 18:06:21 +08] BT2s pipeline grid done
+[2026-11-12 18:06:21 +08] config bs10_bt0.2s_endorseMAJORITY_orgs2
+PHASE_F4CFG_DONE 2026-11-12 18:07:23 +08
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n4-k10000 rc 0 40.8s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n4_k10000 files=11 n=4 t=1 k=10000 preagg=on N=100 pipeline mean=361.9ms online mean=7.862ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=48.9MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n4-k50000 rc 0 61.0s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n4_k50000 files=11 n=4 t=1 k=50000 preagg=on N=100 pipeline mean=523.5ms online mean=43.737ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=76.2MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n4-k100000 rc 0 86.2s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n4_k100000 files=11 n=4 t=1 k=100000 preagg=on N=100 pipeline mean=723.9ms online mean=89.507ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=110.7MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n8-k10000 rc 0 48.3s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n8_k10000 files=19 n=8 t=3 k=10000 preagg=on N=100 pipeline mean=424.4ms online mean=13.915ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=56.6MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n8-k50000 rc 0 98.3s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n8_k50000 files=19 n=8 t=3 k=50000 preagg=on N=100 pipeline mean=840.5ms online mean=78.066ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=113.0MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n8-k100000 rc 0 160.4s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n8_k100000 files=19 n=8 t=3 k=100000 preagg=on N=100 pipeline mean=1357.3ms online mean=161.500ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=187.8MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n12-k10000 rc 0 56.7s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n12_k10000 files=27 n=12 t=5 k=10000 preagg=on N=100 pipeline mean=495.0ms online mean=19.800ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=63.5MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n12-k50000 rc 0 139.2s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n12_k50000 files=27 n=12 t=5 k=50000 preagg=on N=100 pipeline mean=1187.0ms online mean=109.786ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=147.4MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n16-k10000 rc 0 66.2s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n16_k10000 files=35 n=16 t=7 k=10000 preagg=on N=100 pipeline mean=576.1ms online mean=28.097ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=71.9MB
+pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n16-k50000 rc 0 185.1s
+pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n16_k50000 files=35 n=16 t=7 k=50000 preagg=on N=100 pipeline mean=1576.3ms online mean=147.240ms match=100/100 fabric_ok=100 verified=100 peakRSS_p0=182.2MB
+[2026-11-12 18:24:18 +08] BT0.2s pipeline grid done; shutting down SMPC nodes
+[2026-11-12 18:24:21 +08] SMPC nodes shutdown issued
+fabric-bs10_bt0.2s_endorseMAJORITY_orgs2-seq-e2 rc 0 29.8s
+fabric-bs10_bt0.2s_endorseMAJORITY_orgs2-rate50-e2 rc 0 61.0s
+fabric-bs10_bt0.2s_endorseMAJORITY_orgs2-rate100-e2 rc 0 107.0s
+fabric-bs10_bt0.2s_endorseMAJORITY_orgs2-rate150-e2 rc 0 160.0s
+fabric-bs10_bt0.2s_endorseMAJORITY_orgs2-rate200-e2 rc 0 212.9s
+fabric-bs10_bt0.2s_endorseMAJORITY_orgs2-rate250-e2 rc 0 267.7s
+PHASE_F4RUN_DONE 2026-11-12 18:38:20 +08
+[2026-11-12 18:38:20 +08] config bs30_bt2s_endorseMAJORITY_orgs2
+fabric-bs30_bt2s_endorseMAJORITY_orgs2-seq-e2 rc 0 208.1s
+fabric-bs30_bt2s_endorseMAJORITY_orgs2-rate50-e2 rc 0 412.0s
+[2026-11-12 18:50:48 +08] orchestrator stopped by operator during F2 bs30 rate100 (c16 cannot fill 30/50-tx blocks; replaced by orchestrate_node2.sh with concurrency 64)
+[2026-11-12 18:51:29 +08] orchestrate_node2 START
+[2026-11-12 18:51:29 +08] phase G1
+[2026-11-12 18:51:29 +08] config bs30_bt2s_endorseMAJORITY_orgs2
+fabric-bs30_bt2s_endorseMAJORITY_orgs2-rate50-e2_c64 rc 0 61.7s
+fabric-bs30_bt2s_endorseMAJORITY_orgs2-rate100-e2_c64 rc 0 100.7s
+fabric-bs30_bt2s_endorseMAJORITY_orgs2-rate150-e2_c64 rc 0 152.0s
+fabric-bs30_bt2s_endorseMAJORITY_orgs2-rate200-e2_c64 rc 0 200.3s
+fabric-bs30_bt2s_endorseMAJORITY_orgs2-rate250-e2_c64 rc 0 252.7s
+PHASE_G1_DONE 2026-11-12 19:05:25 +08
+[2026-11-12 19:05:25 +08] phase G2
+[2026-11-12 19:05:25 +08] config bs50_bt2s_endorseMAJORITY_orgs2
+fabric-bs50_bt2s_endorseMAJORITY_orgs2-seq-e2 rc 0 208.0s
+fabric-bs50_bt2s_endorseMAJORITY_orgs2-rate50-e2_c64 rc 0 61.9s
+fabric-bs50_bt2s_endorseMAJORITY_orgs2-rate100-e2_c64 rc 0 104.6s
+fabric-bs50_bt2s_endorseMAJORITY_orgs2-rate150-e2_c64 rc 0 156.3s
+fabric-bs50_bt2s_endorseMAJORITY_orgs2-rate200-e2_c64 rc 0 208.1s
+fabric-bs50_bt2s_endorseMAJORITY_orgs2-rate250-e2_c64 rc 0 259.9s
+PHASE_G2_DONE 2026-11-12 19:23:14 +08
+[2026-11-12 19:23:14 +08] phase G3
+[2026-11-12 19:23:14 +08] config bs10_bt2s_endorseANY_orgs2
+fabric-bs10_bt2s_endorseANY_orgs2-seq-e1 rc 0 207.6s
+fabric-bs10_bt2s_endorseANY_orgs2-rate50-e1_c64 rc 0 61.6s
+fabric-bs10_bt2s_endorseANY_orgs2-rate100-e1_c64 rc 0 83.8s
+fabric-bs10_bt2s_endorseANY_orgs2-rate150-e1_c64 rc 0 125.6s
+fabric-bs10_bt2s_endorseANY_orgs2-rate200-e1_c64 rc 0 168.6s
+fabric-bs10_bt2s_endorseANY_orgs2-rate250-e1_c64 rc 0 211.1s
+[2026-11-12 19:38:42 +08] config bs30_bt2s_endorseANY_orgs2
+fabric-bs30_bt2s_endorseANY_orgs2-seq-e1 rc 0 207.6s
+fabric-bs30_bt2s_endorseANY_orgs2-rate50-e1_c64 rc 0 61.6s
+fabric-bs30_bt2s_endorseANY_orgs2-rate100-e1_c64 rc 0 83.6s
+fabric-bs30_bt2s_endorseANY_orgs2-rate150-e1_c64 rc 0 125.2s
+fabric-bs30_bt2s_endorseANY_orgs2-rate200-e1_c64 rc 0 167.2s
+fabric-bs30_bt2s_endorseANY_orgs2-rate250-e1_c64 rc 0 209.2s
+[2026-11-12 19:54:06 +08] config bs50_bt2s_endorseANY_orgs2
+fabric-bs50_bt2s_endorseANY_orgs2-seq-e1 rc 0 207.6s
+fabric-bs50_bt2s_endorseANY_orgs2-rate50-e1_c64 rc 0 61.7s
+fabric-bs50_bt2s_endorseANY_orgs2-rate100-e1_c64 rc 0 86.2s
+fabric-bs50_bt2s_endorseANY_orgs2-rate150-e1_c64 rc 0 129.2s
+fabric-bs50_bt2s_endorseANY_orgs2-rate200-e1_c64 rc 0 175.3s
+fabric-bs50_bt2s_endorseANY_orgs2-rate250-e1_c64 rc 0 216.3s
+PHASE_G3_DONE 2026-11-12 20:09:52 +08
+[2026-11-12 20:09:52 +08] phase G0
+[2026-11-12 20:09:52 +08] config bs10_bt2s_endorseMAJORITY_orgs2
+fabric-bs10_bt2s_endorseMAJORITY_orgs2-rate50-e2_c64 rc 0 61.7s
+fabric-bs10_bt2s_endorseMAJORITY_orgs2-rate100-e2_c64 rc 0 98.1s
+fabric-bs10_bt2s_endorseMAJORITY_orgs2-rate150-e2_c64 rc 0 147.0s
+fabric-bs10_bt2s_endorseMAJORITY_orgs2-rate200-e2_c64 rc 0 198.5s
+fabric-bs10_bt2s_endorseMAJORITY_orgs2-rate250-e2_c64 rc 0 246.3s
+PHASE_G0_DONE 2026-11-12 20:23:33 +08
+[2026-11-12 20:23:33 +08] phase G4
+[2026-11-12 20:23:33 +08] config bs10_bt2s_endorseMAJORITY_orgs3
+CONFIG FAILED bs10_bt2s_endorseMAJORITY_orgs3
+PHASE_G4_DONE 2026-11-12 20:24:46 +08
+[2026-11-12 20:24:46 +08] phase G5
+[2026-11-12 20:24:46 +08] config bs10_bt2s_endorseANY_orgs3
+CONFIG FAILED bs10_bt2s_endorseANY_orgs3
+PHASE_G5_DONE 2026-11-12 20:25:59 +08
+PHASE_DOWN_DONE 2026-11-12 20:26:01 +08
+[2026-11-12 20:26:01 +08] ALL_DONE
+[2026-11-12 20:26:01 +08] self shutdown scheduled +150 min
+[2026-11-12 20:46:30 +08] orchestrate_node3 START (G4/G5 rerun)
+[2026-11-12 20:46:30 +08] phase G4
+[2026-11-12 20:46:30 +08] config bs10_bt2s_endorseMAJORITY_orgs3
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-seq-e2 rc 0 208.2s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-seq-e3 rc 0 208.6s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate50-e2_c64 rc 0 61.8s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate100-e2_c64 rc 0 102.7s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate150-e2_c64 rc 0 151.0s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate200-e2_c64 rc 0 203.4s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate250-e2_c64 rc 0 251.6s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate50-e3_c64 rc 0 61.2s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate100-e3_c64 rc 0 114.1s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate150-e3_c64 rc 0 171.3s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate200-e3_c64 rc 0 229.3s
+fabric-bs10_bt2s_endorseMAJORITY_orgs3-rate250-e3_c64 rc 0 285.7s
+PHASE_G4_DONE 2026-11-12 21:22:09 +08
+[2026-11-12 21:22:09 +08] phase G5
+[2026-11-12 21:22:09 +08] config bs10_bt2s_endorseANY_orgs3
+fabric-bs10_bt2s_endorseANY_orgs3-rate50-e1_c64 rc 0 61.7s
+fabric-bs10_bt2s_endorseANY_orgs3-rate100-e1_c64 rc 0 87.8s
+fabric-bs10_bt2s_endorseANY_orgs3-rate150-e1_c64 rc 0 127.9s
+fabric-bs10_bt2s_endorseANY_orgs3-rate200-e1_c64 rc 0 170.4s
+fabric-bs10_bt2s_endorseANY_orgs3-rate250-e1_c64 rc 0 212.9s
+fabric-bs10_bt2s_endorseANY_orgs3-rate50-e2_c64 rc 0 60.9s
+fabric-bs10_bt2s_endorseANY_orgs3-rate100-e2_c64 rc 0 100.3s
+fabric-bs10_bt2s_endorseANY_orgs3-rate150-e2_c64 rc 0 150.7s
+fabric-bs10_bt2s_endorseANY_orgs3-rate200-e2_c64 rc 0 202.2s
+fabric-bs10_bt2s_endorseANY_orgs3-rate250-e2_c64 rc 0 252.5s
+fabric-bs10_bt2s_endorseANY_orgs3-rate50-e3_c64 rc 0 61.2s
+fabric-bs10_bt2s_endorseANY_orgs3-rate100-e3_c64 rc 0 114.4s
+fabric-bs10_bt2s_endorseANY_orgs3-rate150-e3_c64 rc 0 171.8s
+fabric-bs10_bt2s_endorseANY_orgs3-rate200-e3_c64 rc 0 229.4s
+fabric-bs10_bt2s_endorseANY_orgs3-rate250-e3_c64 rc 0 287.2s
+PHASE_G5_DONE 2026-11-12 22:01:52 +08
+PHASE_DOWN_DONE 2026-11-12 22:01:57 +08
+[2026-11-12 22:01:57 +08] ALL_DONE_3

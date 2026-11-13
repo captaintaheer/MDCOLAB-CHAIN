@@ -1,0 +1,60 @@
+[0;34mUsing docker and docker compose[0m
+[0;34mStopping network[0m
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/compose/compose-bft-test-net.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/compose/docker/docker-compose-bft-test-net.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/compose/compose-couch.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/compose/docker/docker-compose-couch.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/compose/compose-ca.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/compose/docker/docker-compose-ca.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/addOrg3/compose/compose-org3.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/addOrg3/compose/docker/docker-compose-org3.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/addOrg3/compose/compose-couch-org3.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/addOrg3/compose/docker/docker-compose-couch-org3.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/addOrg3/compose/compose-ca-org3.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+time="2026-11-12T21:22:09+08:00" level=warning msg="/workspace/run_2026-11-11/MDCOLAB-CHAIN/layer-3/fabric-samples/test-network/addOrg3/compose/docker/docker-compose-ca-org3.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Container orderer.example.com Stopping 
+ Container peer0.org3.example.com Stopping 
+ Container peer0.org1.example.com Stopping 
+ Container peer0.org2.example.com Stopping 
+ Container orderer.example.com Stopped 
+ Container orderer.example.com Removing 
+ Container orderer.example.com Removed 
+ Container peer0.org3.example.com Stopped 
+ Container peer0.org3.example.com Removing 
+ Container peer0.org3.example.com Removed 
+ Container peer0.org1.example.com Stopped 
+ Container peer0.org1.example.com Removing 
+ Container peer0.org1.example.com Removed 
+ Container peer0.org2.example.com Stopped 
+ Container peer0.org2.example.com Removing 
+ Container peer0.org2.example.com Removed 
+ Volume compose_peer0.org2.example.com Removing 
+ Volume compose_orderer.example.com Removing 
+ Volume compose_peer0.org3.example.com Removing 
+ Volume compose_peer0.org1.example.com Removing 
+ Network fabric_test Removing 
+ Volume compose_peer0.org2.example.com Removed 
+ Volume compose_orderer.example.com Removed 
+ Network fabric_test Removed 
+ Volume compose_peer0.org3.example.com Removed 
+ Volume compose_peer0.org1.example.com Removed 
+Error response from daemon: get docker_orderer.example.com: no such volume
+Error response from daemon: get docker_peer0.org1.example.com: no such volume
+Error response from daemon: get docker_peer0.org2.example.com: no such volume
+[0;34mRemoving remaining containers[0m
+[0;34mRemoving generated chaincode docker images[0m
+Untagged: dev-peer0.org3.example.com-basic_1.0-1f66cc610fb8ac88d69e78edc4c1cb09bac7c839fb5399009310ac8dfa703799-ccec9d834ffd27ecc7c925a0a627c8c1fed3bde5468b148a28359c6225b99138:latest
+Deleted: sha256:5117851d0044f43f84166b7f60712a5f8cad160ebe730b13b54749d7cd234ab5
+Deleted: sha256:c9ba58adf77d0f4eeb76ec6a1fad741732bb1cb4eccbf8259d17a8a7a6125fbf
+Deleted: sha256:e932e32ee0ba71a159d64b9c9956f9ca07aa56dae050000240336f568f7dbe5f
+Deleted: sha256:c434d2932db81b6aff4bc2cea800b4d70e29852977a34abdef5da3109b794b57
+Untagged: dev-peer0.org2.example.com-basic_1.0-1f66cc610fb8ac88d69e78edc4c1cb09bac7c839fb5399009310ac8dfa703799-77f4314a0214359a817dc282f148d1d72ce27da08c59102dc659741e9ed3349f:latest
+Deleted: sha256:6d13023f60ad9239e5799468c369314cfa39a30f9515b9f4de1dbcdb81b180e9
+Deleted: sha256:342f9db75ed43723145c990bf2b4b83197dc0b9b8cecb462fcc5fee54b9bc64a
+Deleted: sha256:a1a9ce0eb1f0e52423151f36de68549c55dd424911554ef4d64866e401ba3985
+Deleted: sha256:c77bee53bee2f8f0b9723c8e4e6a0b3aef6f0b6187c031dfea6a8edf0fd25402
+Untagged: dev-peer0.org1.example.com-basic_1.0-1f66cc610fb8ac88d69e78edc4c1cb09bac7c839fb5399009310ac8dfa703799-8f4296b79b03dc5e553784fa18a614f0c6e41f74be802b7338869e17a94c1367:latest
+Deleted: sha256:36fcf6a1c42a5e9e2cde21f3dac14aa8319fdaa4eefd1ba1b35459cc0cba4763
+Deleted: sha256:ef126f98b20ac7863f38e9babb9832a757cea2be5bd1f10c95cc81d57dabcb52
+Deleted: sha256:9df2f52f949691f1b5980b06fbd7f8c7229deaecb9f0fa659b377e11161e6da3
+Deleted: sha256:a5378f04b2eb106e9ecf6a4856deb9b79eabf79dde532bcdb71543f13312e4ec

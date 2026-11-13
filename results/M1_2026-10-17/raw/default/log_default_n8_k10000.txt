@@ -1,0 +1,7 @@
+python smpc_bench.py -M 8 --k 10000 --trials 100 --warmup 10 --tag default_n8_k10000 --out-dir results/raw/default
+2026-10-17 15:44:25,355 Install package gmpy2 for better performance.
+2026-10-17 15:44:25,516 Start MPyC runtime v0.9
+2026-10-17 15:44:25,740 All 8 parties connected.
+2026-10-17 15:44:34,688 Stop MPyC -- elapsed time: 0:00:08.948|bytes sent: 110187763
+n=8 k=10000 p_bits=64 ssl=False online mean=12.275ms median=11.652 p95=17.032 match=100/100 peakRSS=62.0MB
+

@@ -1,0 +1,31 @@
+Starting MDCOLAB-CHAIN automation with genomic dataset
+
+===== LAYER 1: SECRET SHARING =====
+
+> Running command: python layer-1/generate_shares.py --genome data/phiX174.fna
+Share 0 saved to layer-2/Input-P0-0: 10
+Share 1 saved to layer-2/Input-P1-0: 5
+Share 2 saved to layer-2/Input-P2-0: 2396
+Shares metadata saved to layer-1/shares.json
+Secret sharing complete. Computed GC count: 2411, Sum of shares: 2411
+
+Layer 1 completed successfully
+
+===== LAYER 2: SECURE COMPUTATION =====
+
+> Running command: python layer-2/compute_sum.py
+Read share 0 from layer-2/Input-P0-0: 10
+Read share 1 from layer-2/Input-P1-0: 5
+Read share 2 from layer-2/Input-P2-0: 2396
+Computed sum of shares: 2411
+Result saved to layer-2/output/result.txt
+Result hash saved to layer-2/output/result_hash.txt: 50f72405baf11b0f73f6a3db7152798bf2f958384e806befdf4ee6ddfdd9e198
+Layer-2 computation completed successfully
+
+Layer 2 completed successfully
+
+===== LAYER 3: BLOCKCHAIN INTEGRATION =====
+
+> Running command: python layer-3/fabric-samples/test-network/blockchain.py
+Error executing command: [Errno 2] No such file or directory: 'layer-3/fabric-samples/test-network'
+Layer 3 failed

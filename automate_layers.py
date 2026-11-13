@@ -14,7 +14,7 @@ import argparse
 import time
 import json
 import re
-import hashlib
+import shutil
 import psutil
 import concurrent.futures
 import base64
@@ -41,8 +41,11 @@ def run_command(cmd, cwd=None, env=None):
         print(f"Command output: {e.stdout}")
         print(f"Command error: {e.stderr}")
         return False
+    except OSError as e:  # e.g. missing working directory or script
+        print(f"Error executing command: {e}")
+        return False
 
-def run_layer1(base_dir):
+def run_layer1(base_dir, genome=None):
     """
     Run Layer-1: Secret sharing
     """
@@ -55,6 +58,8 @@ def run_layer1(base_dir):
     
     # Run the script
     cmd = [sys.executable, script_path]
+    if genome:
+        cmd += ['--genome', os.path.abspath(genome)]  # Layer 1 runs with cwd=layer-1
     return run_command(cmd, cwd=layer1_dir)
 
 def run_layer2(base_dir):
@@ -72,17 +77,57 @@ def run_layer2(base_dir):
     cmd = [sys.executable, script_path]
     return run_command(cmd, cwd=layer2_dir)
 
+def layer3_script(base_dir):
+    """
+    Return the Layer 3 script: test-network/blockchain.py in the fabric-samples working copy if present,
+    otherwise the readiness check shipped in layer-3/blockchain.py.
+    """
+    for p in (os.path.join(base_dir, "layer-3", "fabric-samples", "test-network", "blockchain.py"),
+              os.path.join(base_dir, "layer-3", "blockchain.py")):
+        if os.path.exists(p):
+            return p
+    return None
+
+def check_fabric(base_dir, need_script=True):
+    """
+    Return a list of reasons why the Fabric test network cannot be used (empty if it looks usable).
+    """
+    problems = []
+    layer3_dir = os.path.join(base_dir, "layer-3", "fabric-samples", "test-network")
+    if not os.path.isdir(layer3_dir):
+        problems.append(f"{os.path.relpath(layer3_dir, base_dir)} not found (fabric-samples is not cloned)")
+    elif need_script and layer3_script(base_dir) is None:
+        problems.append("no Layer 3 script found (layer-3/fabric-samples/test-network/blockchain.py or layer-3/blockchain.py)")
+    peer_bin = os.path.join(base_dir, "layer-3", "fabric-samples", "bin", "peer")
+    if not os.path.exists(peer_bin):
+        problems.append(f"{os.path.relpath(peer_bin, base_dir)} not found (Fabric binaries are not installed)")
+    if shutil.which("docker") is None:
+        problems.append("docker is not installed or not on PATH")
+    else:
+        try:
+            subprocess.run(["docker", "info"], check=True, capture_output=True, timeout=30)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+            problems.append("the Docker daemon is not reachable (`docker info` failed)")
+    return problems
+
 def run_layer3(base_dir):
     """
     Run Layer-3: Blockchain integration
     """
     print("\n===== LAYER 3: BLOCKCHAIN INTEGRATION =====")
     layer3_dir = os.path.join(base_dir, "layer-3", "fabric-samples", "test-network")
-    script_path = os.path.join(layer3_dir, "blockchain.py")
+    problems = check_fabric(base_dir)
+    if problems:
+        print("Hyperledger Fabric is not available, so Layer 3 cannot run:")
+        for p in problems:
+            print(f"  - {p}")
+        print("See layer-3/README.md for the Fabric setup.")
+        return False
     
     # Run the script
-    cmd = [sys.executable, script_path]
-    return run_command(cmd, cwd=layer3_dir)
+    env = dict(os.environ, FABRIC_TEST_NETWORK=os.environ.get('FABRIC_TEST_NETWORK', layer3_dir))
+    cmd = [sys.executable, layer3_script(base_dir)]
+    return run_command(cmd, cwd=layer3_dir, env=env)
 
 def parse_smpc_output(output):
     metrics = {}
@@ -136,7 +181,6 @@ def find_mpyc_python(base_dir, override=None):
         sys.executable,
         os.path.join(base_dir, 'venv', 'bin', 'python3'),
         os.path.join(base_dir, 'venv', 'bin', 'python'),
-        os.path.join(os.path.dirname(base_dir), 'AGENTS', 'chatbot-poc', 'myenv', 'bin', 'python'),
         'python3',
         'python'
     ])
@@ -151,10 +195,11 @@ def find_mpyc_python(base_dir, override=None):
 def collect_smpc_metrics(base_dir, num_ops=10, parties=3, smpc_python=None, timeout_s=None):
     layer2_dir = os.path.join(base_dir, "layer-2")
     py = find_mpyc_python(base_dir, smpc_python)
-    cmd = [py, '-m', 'mpyc', 'layer2_smpc.py', '--num_ops', str(num_ops), '-M', str(parties)]
+    # Run the MPyC script directly (`python -m mpyc` starts MPyC's interactive REPL).
+    cmd = [py, 'layer2_smpc.py', '--num_ops', str(num_ops), '-M', str(parties)]
     to = timeout_s if timeout_s is not None else (10 if parties == 1 else 60)
     try:
-        result = subprocess.run(cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=to)
+        result = subprocess.run(cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=to, stdin=subprocess.DEVNULL)
         output = (result.stdout or '') + "\n" + (result.stderr or '')
     except subprocess.TimeoutExpired as e:
         def _to_str(x):
@@ -172,7 +217,7 @@ def collect_smpc_metrics(base_dir, num_ops=10, parties=3, smpc_python=None, time
     if not metrics:
         alt_cmd = [py, 'layer2_smpc.py', '--num_ops', str(num_ops)]
         try:
-            alt = subprocess.run(alt_cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=30)
+            alt = subprocess.run(alt_cmd, cwd=layer2_dir, check=True, text=True, capture_output=True, timeout=30, stdin=subprocess.DEVNULL)
             alt_out = (alt.stdout or '') + "\n" + (alt.stderr or '')
             metrics = parse_smpc_output(alt_out)
         except subprocess.CalledProcessError:
@@ -342,21 +387,35 @@ def collect_ledger_metrics(base_dir, tx_count=5, mode='correctness', disable_pee
     if total_time > 0:
         tps = successes / total_time
     qlat = None
+    integrity_reason = 'no_successful_invoke'
     if last_asset_id:
         qcmd = [os.path.join(layer3_dir, '../bin/peer'), 'chaincode', 'query', '-C', 'mychannel', '-n', 'basic', '-c', json.dumps({"function":"ReadAsset","Args":[last_asset_id]})]
-        ts = time.perf_counter()
-        try:
-            res = subprocess.run(qcmd, cwd=layer3_dir, env=env, check=True, text=True, capture_output=True)
-            qlat = time.perf_counter() - ts
-            data = res.stdout.strip()
-            try:
-                obj = json.loads(data)
-                integrity_ok = _asset_matches_hash(obj, base_hash)
-            except Exception:
-                integrity_ok = False
-        except subprocess.CalledProcessError:
-            integrity_ok = False
-            qlat = None
+        # Read-back integrity check.  In throughput mode invokes are sent without --waitForEvent, so the
+        # last asset may not be committed yet when it is queried ("asset ... does not exist").  Poll until
+        # the asset is visible (or a timeout expires) and record why the check failed, instead of
+        # reporting a not-yet-committed asset as an integrity failure.
+        integrity_ok = False
+        deadline = time.perf_counter() + float(os.environ.get('READBACK_TIMEOUT_S', '15'))
+        attempts = 0
+        while True:
+            attempts += 1
+            ts = time.perf_counter()
+            res = subprocess.run(qcmd, cwd=layer3_dir, env=env, text=True, capture_output=True)
+            if res.returncode == 0:
+                qlat = time.perf_counter() - ts
+                try:
+                    obj = json.loads(res.stdout.strip())
+                    integrity_ok = _asset_matches_hash(obj, base_hash)
+                    integrity_reason = 'digest_match' if integrity_ok else 'digest_mismatch'
+                except Exception:
+                    integrity_reason = 'unparseable_asset'
+                break
+            if 'does not exist' in (res.stderr or '') and time.perf_counter() < deadline:
+                time.sleep(0.5)
+                continue
+            integrity_reason = 'query_failed: ' + (res.stderr or '').strip()[-200:]
+            break
+        print(f"[integrity] asset={last_asset_id} attempts={attempts} result={integrity_reason}")
     else:
         integrity_ok = False
     if not disable_peer_stats:
@@ -372,6 +431,7 @@ def collect_ledger_metrics(base_dir, tx_count=5, mode='correctness', disable_pee
         'peer_peak_cpu': peaks['cpu'],
         'peer_peak_mem_mb': peaks['mem_mb'],
         'integrity_ok': integrity_ok,
+        'integrity_reason': integrity_reason,
         'durations': durations
     }
 
@@ -452,7 +512,7 @@ def render_markdown_table(rows):
         lines.append('| ' + ' | '.join(str(r[h]) for h in headers) + ' |')
     return '\n'.join(lines)
 
-def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None, end_to_end=None, charts=None, error=None):
+def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None, end_to_end=None, charts=None, error=None, report_path=None):
     smpc = smpc or {}
     baseline = baseline or {}
     ledger = ledger or {}
@@ -474,6 +534,7 @@ def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None,
         {'Metric':'Peer Peak RAM (MB)','Value':round(ledger.get('peer_peak_mem_mb',0.0),2)},
         {'Metric':'End-to-End Latency (s)','Value':round(end_to_end,4)},
         {'Metric':'Integrity OK','Value':ledger.get('integrity_ok',False)},
+        {'Metric':'Integrity Check','Value':ledger.get('integrity_reason','')},
         {'Metric':'Stage','Value':stage},
         {'Metric':'Error','Value':error or ''}
     ]
@@ -494,7 +555,7 @@ def write_partial_report(base_dir, stage, smpc=None, baseline=None, ledger=None,
         parts.append('```\n'+charts['durations_ascii']+'\n```')
     out_dir = os.path.join(base_dir, 'output', 'charts')
     os.makedirs(out_dir, exist_ok=True)
-    report_path = os.path.join(base_dir, 'metrics_report.md')
+    report_path = report_path or os.path.join(base_dir, 'metrics_report.md')
     final_md = "\n".join(parts)
     with open(report_path, 'w') as f:
         f.write(final_md)
@@ -584,10 +645,10 @@ def save_check_charts(base_dir, smpc, baseline, ledger, end_to_end):
         runs = ['Run 1','Run 2','Run 10']
         fig3 = plt.figure(figsize=(6,3))
         idx = list(range(len(runs)))
-        b1 = plt.bar(idx, [l1]*len(runs), label='Layer 1')
-        b2 = plt.bar(idx, [l2]*len(runs), bottom=[l1]*len(runs), label='Layer 2')
-        b3 = plt.bar(idx, [l3]*len(runs), bottom=[l1+l2]*len(runs), label='Layer 3')
-        b4 = plt.bar(idx, [l4]*len(runs), bottom=[l1+l2+l3]*len(runs), label='Layer 4')
+        plt.bar(idx, [l1]*len(runs), label='Layer 1')
+        plt.bar(idx, [l2]*len(runs), bottom=[l1]*len(runs), label='Layer 2')
+        plt.bar(idx, [l3]*len(runs), bottom=[l1+l2]*len(runs), label='Layer 3')
+        plt.bar(idx, [l4]*len(runs), bottom=[l1+l2+l3]*len(runs), label='Layer 4')
         plt.xticks(idx, runs)
         plt.ylabel('s')
         plt.title('End-to-End Latency Breakdown')
@@ -779,6 +840,8 @@ def main():
     parser.add_argument('--tps_latency_rates', type=str, default='50,100,150,200,250')
     parser.add_argument('--endorser_counts', type=str, default='1,2,3')
     parser.add_argument('--sweep_concurrency', type=int, default=16)
+    parser.add_argument('--genome', type=str, default=None, help='FASTA input for Layer 1 (default: data/genome.fna)')
+    parser.add_argument('--report_path', type=str, default=None, help='Where to write the metrics report (default: <repo>/metrics_report.md)')
     args = parser.parse_args()
     
     # Get the base directory
@@ -788,7 +851,7 @@ def main():
     
     t0 = time.perf_counter()
     # Run each layer sequentially
-    if run_layer1(current_dir):
+    if run_layer1(current_dir, args.genome):
         print("Layer 1 completed successfully")
         
         time.sleep(max(args.pause_ms, 0) / 1000.0)
@@ -830,14 +893,15 @@ def main():
                     {'Metric':'Peer Peak CPU (%)','Value':round(ledger.get('peer_peak_cpu',0.0),2)},
                     {'Metric':'Peer Peak RAM (MB)','Value':round(ledger.get('peer_peak_mem_mb',0.0),2)},
                     {'Metric':'End-to-End Latency (s)','Value':round(end_to_end,4)},
-                    {'Metric':'Integrity OK','Value':ledger.get('integrity_ok',False)}
+                    {'Metric':'Integrity OK','Value':ledger.get('integrity_ok',False)},
+                    {'Metric':'Integrity Check','Value':ledger.get('integrity_reason','')}
                 ]
                 md = render_markdown_table(rows)
                 print("\n===== AUTOMATION COMPLETE =====")
                 print("Successfully processed genomic dataset through all layers")
                 print("\n===== METRICS REPORT =====")
                 print(md)
-                report_path = os.path.join(current_dir, 'metrics_report.md')
+                report_path = args.report_path or os.path.join(current_dir, 'metrics_report.md')
                 charts = generate_charts(smpc, baseline, ledger, end_to_end)
                 parts = [md, "", "## Charts",]
                 if charts.get('throughput_png'):
@@ -857,7 +921,8 @@ def main():
                 insights.append(f"TPS {ledger.get('tps',0.0):.2f} with success rate {ledger.get('tx_success_rate',0.0):.2f}.")
                 insights.append(f"Latency: SMPC {smpc.get('latency_seconds',0.0):.4f}s, Tx Avg {ledger.get('tx_latency_avg',0.0):.4f}s, Query {ledger.get('query_latency',0.0):.4f}s, E2E {end_to_end:.4f}s.")
                 parts.append("\n## Insights\n- "+"\n- ".join(insights))
-                save_check_charts(current_dir, smpc, baseline, ledger, end_to_end)
+                if args.save_check_charts:  # charts built from the values listed in check.txt
+                    save_check_charts(current_dir, smpc, baseline, ledger, end_to_end)
                 if args.tps_latency_sweep:
                     rates = [int(x) for x in args.tps_latency_rates.split(',') if x.strip()]
                     counts = [int(x) for x in args.endorser_counts.split(',') if x.strip()]
@@ -887,18 +952,19 @@ def main():
                 print("Layer 3 failed")
                 end_to_end = time.perf_counter() - t0
                 charts = generate_charts(smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'durations':[]}, end_to_end)
-                save_check_charts(current_dir, smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end)
-                write_partial_report(current_dir, 'Layer 3 failed', smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end, charts, 'Layer 3 did not complete')
+                if args.save_check_charts:
+                    save_check_charts(current_dir, smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end)
+                write_partial_report(current_dir, 'Layer 3 failed', smpc, baseline, {'tps':0.0,'tx_latency_avg':0.0,'query_latency':0.0,'peer_peak_cpu':0.0,'peer_peak_mem_mb':0.0,'integrity_ok':False,'durations':[]}, end_to_end, charts, 'Layer 3 did not complete', report_path=args.report_path)
                 return 3
         else:
             print("Layer 2 failed")
             end_to_end = time.perf_counter() - t0
-            write_partial_report(current_dir, 'Layer 2 failed', {}, {}, {}, end_to_end, {}, 'Layer 2 did not complete')
+            write_partial_report(current_dir, 'Layer 2 failed', {}, {}, {}, end_to_end, {}, 'Layer 2 did not complete', report_path=args.report_path)
             return 2
     else:
         print("Layer 1 failed")
         end_to_end = time.perf_counter() - t0
-        write_partial_report(current_dir, 'Layer 1 failed', {}, {}, {}, end_to_end, {}, 'Layer 1 did not complete')
+        write_partial_report(current_dir, 'Layer 1 failed', {}, {}, {}, end_to_end, {}, 'Layer 1 did not complete', report_path=args.report_path)
         return 1
 
 if __name__ == "__main__":

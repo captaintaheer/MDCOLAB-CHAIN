@@ -1,0 +1,20 @@
+{
+ "tag": "bs10_bt2s_endorseMAJORITY_orgs3_seq_e3",
+ "rate_offered": 0.0,
+ "duration_s": null,
+ "concurrency": 1,
+ "endorsers": 3,
+ "submitted": 100,
+ "valid": 100,
+ "invalid_or_error": 0,
+ "window_s": 208.50263571739197,
+ "tps_committed": 0.47961024404287006,
+ "submit_rate_achieved": 0.4796024535529809,
+ "finality_mean_s": 2.0849577450752257,
+ "finality_median_s": 2.085719585418701,
+ "finality_p95_s": 2.0883190631866455,
+ "start": "2026-11-12T20:51:27+08:00",
+ "statuses": {
+  "VALID": 100
+ }
+}

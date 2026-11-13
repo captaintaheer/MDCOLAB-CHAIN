@@ -1,0 +1,24 @@
+{
+ "experiment_id": "fabric-bs10_bt2s_endorseMAJORITY_orgs2-rate200-e2",
+ "maps_to": "Table II (TPS); Fig. 3",
+ "command": "python /workspace/run_2026-11-11/harness/fabric_bench.py --rate 200 --duration 60 --concurrency 16 --endorsers 2 --out-dir /workspace/run_2026-11-11/out/fabric/bs10_bt2s_endorseMAJORITY_orgs2/rate200_e2 --tag bs10_bt2s_endorseMAJORITY_orgs2_r200_e2",
+ "cwd": "/home/ubuntu",
+ "parameters": {
+  "block_size_MaxMessageCount": 10,
+  "BatchTimeout": "2s",
+  "orgs": 2,
+  "endorsement_policy": "majority",
+  "endorsers": 2,
+  "rate": 200,
+  "concurrency": 16,
+  "duration_s": 60,
+  "txs": null
+ },
+ "host": "aws ap-southeast-1a c6i.2xlarge (8 vCPU, 16 GiB), single instance running the Docker test-network",
+ "start": "2026-11-12T16:40:19+08:00",
+ "end": "2026-11-12T16:43:53+08:00",
+ "duration_s": 213.5,
+ "git_commit": "",
+ "exit_status": 0,
+ "note": ""
+}

@@ -1,0 +1,5 @@
+# Exact versions installed on every node of the AWS run of 12 Nov 2026 (Python 3.12.3).
+# Source: results/aws_2026-11-12/env/smpc_node*.txt and fabric_node.txt (pip lines).
+mpyc==0.9
+numpy==1.26.4
+psutil==7.2.2

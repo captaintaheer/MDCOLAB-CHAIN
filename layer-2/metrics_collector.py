@@ -1,12 +1,17 @@
+import os
 import subprocess
+import sys
 import json
 import time
 import psutil
 import re
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+
 def run_smpc_metrics(num_parties, num_ops=10):
-    cmd = ['python', '-m', 'mpyc', 'layer2_smpc.py', '--num_ops', str(num_ops), '-M', str(num_parties)]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Run the MPyC script directly (`python -m mpyc` starts MPyC's interactive REPL).
+    cmd = [sys.executable, 'layer2_smpc.py', '--num_ops', str(num_ops), '-M', str(num_parties)]
+    process = subprocess.Popen(cmd, cwd=HERE, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     output = stdout.decode()
     
@@ -29,7 +34,7 @@ def run_non_secure_metrics(num_ops=10):
     peak_mem = start_mem
     start_time = time.perf_counter()
     
-    with open("../layer-1/shares.json", "r") as f:
+    with open(os.path.join(HERE, "..", "layer-1", "shares.json"), "r") as f:
         shares_data = json.load(f)["shares"]
     inputs = [int(share.split('-')[1]) for share in shares_data]
     

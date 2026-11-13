@@ -1,0 +1,4 @@
+188c188
+<   BatchTimeout: 2s
+---
+>   BatchTimeout: 200ms

@@ -1,0 +1,8 @@
+label,config,run,tps_committed,finality_mean_s
+Majority (baseline),bs10_bt2s_endorseMAJORITY_orgs2,rate100_e2_c64,61.54429835,1.032788881
+1-of-n,bs10_bt2s_endorseANY_orgs2,rate100_e1_c64,72.07405631,0.8804481979
+Block 10,bs10_bt2s_endorseMAJORITY_orgs2,rate100_e2_c64,61.54429835,1.032788881
+Block 30,bs30_bt2s_endorseMAJORITY_orgs2,rate100_e2_c64,60.61306043,1.050386071
+Block 50,bs50_bt2s_endorseMAJORITY_orgs2,rate100_e2_c64,58.96029509,1.080631401
+Orgs 2,bs10_bt2s_endorseMAJORITY_orgs2,rate100_e2_c64,61.54429835,1.032788881
+Orgs 3,bs10_bt2s_endorseMAJORITY_orgs3,rate100_e2_c64,60.08342037,1.057866095

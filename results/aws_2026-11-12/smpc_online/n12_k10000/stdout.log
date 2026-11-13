@@ -1,0 +1,6 @@
+$ /home/ubuntu/venv/bin/python smpc_bench.py -P <smpc-node00>:11365 -P <smpc-node01>:11365 -P <smpc-node02>:11365 -P <smpc-node03>:11365 -P <smpc-node04>:11365 -P <smpc-node05>:11365 -P <smpc-node06>:11365 -P <smpc-node07>:11365 -P <smpc-node08>:11365 -P <smpc-node09>:11365 -P <smpc-node10>:11365 -P <smpc-node11>:11365 --k 10000 --trials 100 --warmup 10 --seed 20261017 --tag default_n12_k10000 --out-dir /home/ubuntu/run/out/smpc_aws/n12_k10000 -I 0
+2026-11-12 16:18:54,911 Install package gmpy2 for better performance.
+2026-11-12 16:18:54,940 Start MPyC runtime v0.9
+2026-11-12 16:18:54,946 All 12 parties connected.
+2026-11-12 16:19:14,683 Stop MPyC -- elapsed time: 0:00:19.737|bytes sent: 176299943
+n=12 k=10000 p_bits=64 ssl=False online mean=20.302ms median=20.359 p95=22.249 match=100/100 peakRSS=61.5MB

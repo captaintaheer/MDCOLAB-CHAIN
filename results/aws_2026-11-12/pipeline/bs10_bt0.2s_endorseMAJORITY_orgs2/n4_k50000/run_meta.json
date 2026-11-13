@@ -1,0 +1,25 @@
+{
+ "experiment_id": "pipeline-aws-bs10_bt0.2s_endorseMAJORITY_orgs2-n4-k50000",
+ "maps_to": "Table III; Table V",
+ "command": "/home/ubuntu/venv/bin/python pipeline_bench.py -P <fabric-node>:11366 -P <smpc-node00>:11366 -P <smpc-node01>:11366 -P <smpc-node02>:11366 --k 50000 --trials 100 --warmup 10 --seed 20261017 --fabric --tag pipeline_bs10_bt0.2s_endorseMAJORITY_orgs2_n4_k50000 --out-dir /home/ubuntu/run/out/pipeline_aws/bs10_bt0.2s_endorseMAJORITY_orgs2/n4_k50000 -I 0",
+ "cwd": "/home/ubuntu/run/harness",
+ "parameters": {
+  "n": 4,
+  "k": 50000,
+  "t": "MPyC default (n-1)//2",
+  "trials": 100,
+  "warmup": 10,
+  "bits": null,
+  "ssl": false,
+  "seed": 20261017,
+  "fabric_config": "bs10_bt0.2s_endorseMAJORITY_orgs2",
+  "deployment": "party 0 on Fabric node c6i.2xlarge; parties 1..n-1 one per c6i.large node; cluster PG ap-southeast-1a"
+ },
+ "host": "aws ap-southeast-1a: party0 c6i.2xlarge (Fabric node) + 3 x c6i.large",
+ "start": "2026-11-12T18:08:09+08:00",
+ "end": "2026-11-12T18:09:10+08:00",
+ "duration_s": 61.0,
+ "git_commit": "",
+ "exit_status": 0,
+ "note": ""
+}

@@ -1,0 +1,4 @@
+[2026-11-12 17:10:49 +08] START
+[2026-11-12 17:10:49 +08] in-flight run finished
+pipeline-aws-bs10_bt2s_endorseMAJORITY_orgs2-n8-k10000 rc 1 15.9s
+pipeline_bs10_bt2s_endorseMAJORITY_orgs2_n8_k10000 files=10 Traceback (enclosing MPyC coroutine call):

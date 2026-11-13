@@ -1,0 +1,2 @@
+smpc_trials,smpc_oracle_match,pipeline_trials,pipeline_oracle_match,pipeline_fabric_ok,pipeline_readback_verified,fabric_transactions,fabric_valid
+800,800,2300,2300,2300,2300,588900,588900

@@ -1,0 +1,14 @@
+hyperledger/fabric-baseos:2.5 3854817b987d
+hyperledger/fabric-baseos:2.5.4 3854817b987d
+hyperledger/fabric-baseos:latest 3854817b987d
+hyperledger/fabric-ca:1.5.17 2161c222bb9e
+hyperledger/fabric-ca:latest 2161c222bb9e
+hyperledger/fabric-ccenv:2.5 6dac93f94c87
+hyperledger/fabric-ccenv:2.5.4 6dac93f94c87
+hyperledger/fabric-ccenv:latest 6dac93f94c87
+hyperledger/fabric-orderer:2.5 7a73187b5c49
+hyperledger/fabric-orderer:2.5.4 7a73187b5c49
+hyperledger/fabric-orderer:latest 7a73187b5c49
+hyperledger/fabric-peer:2.5 4f8d1b54d8b0
+hyperledger/fabric-peer:2.5.4 4f8d1b54d8b0
+hyperledger/fabric-peer:latest 4f8d1b54d8b0

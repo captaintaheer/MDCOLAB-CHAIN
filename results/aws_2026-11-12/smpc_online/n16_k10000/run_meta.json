@@ -1,0 +1,24 @@
+{
+ "experiment_id": "smpc-aws-default-n16-k10000",
+ "maps_to": "Table I (multi-node rows); Table S1",
+ "command": "/home/ubuntu/venv/bin/python smpc_bench.py -P <smpc-node00>:11365 -P <smpc-node01>:11365 -P <smpc-node02>:11365 -P <smpc-node03>:11365 -P <smpc-node04>:11365 -P <smpc-node05>:11365 -P <smpc-node06>:11365 -P <smpc-node07>:11365 -P <smpc-node08>:11365 -P <smpc-node09>:11365 -P <smpc-node10>:11365 -P <smpc-node11>:11365 -P <smpc-node12>:11365 -P <smpc-node13>:11365 -P <smpc-node14>:11365 -P <smpc-node15>:11365 --k 10000 --trials 100 --warmup 10 --seed 20261017 --tag default_n16_k10000 --out-dir /home/ubuntu/run/out/smpc_aws/n16_k10000 -I 0",
+ "cwd": "/home/ubuntu/run/MDCOLAB-CHAIN/layer-2",
+ "parameters": {
+  "profile": "default",
+  "n": 16,
+  "k": 10000,
+  "trials": 100,
+  "warmup": 10,
+  "bits": null,
+  "ssl": false,
+  "seed": 20261017,
+  "deployment": "one party per c6i.large node, cluster PG, ap-southeast-1a, MPyC -P host:port over private IPs"
+ },
+ "host": "aws ap-southeast-1a c6i.large x16 (one party per node, cluster placement group)",
+ "start": "2026-11-12T16:31:38+08:00",
+ "end": "2026-11-12T16:32:08+08:00",
+ "duration_s": 30.2,
+ "git_commit": "",
+ "exit_status": 0,
+ "note": ""
+}

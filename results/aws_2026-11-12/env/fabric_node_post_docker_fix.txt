@@ -1,0 +1,15 @@
+# captured after Docker replacement (used for all Fabric runs)
+docker server 28.5.2 api 1.51 min_api 1.24
+Docker Compose version v5.7.1
+go version go1.22.2 linux/amd64
+peer:
+ Version: v2.5.4
+ Commit SHA: e1e8e2e
+orderer:
+ Version: v2.5.4
+configtxgen:
+ Version: v2.5.4
+peer:
+ Version: v2.5.4
+hyperledger/fabric-peer:latest
+hyperledger/fabric-orderer:latest

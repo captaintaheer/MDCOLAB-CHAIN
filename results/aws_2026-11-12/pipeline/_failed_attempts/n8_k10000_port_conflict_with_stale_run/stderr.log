@@ -1,0 +1,11 @@
+  File "/home/ubuntu/run/harness/pipeline_bench.py", line 109, in main
+    await mpc.output(mpc.input(sec(0), senders=0))          # synchronise parties before the trial
+Traceback (most recent call last):
+  File "/home/ubuntu/run/harness/pipeline_bench.py", line 193, in <module>
+    mpc.run(main())
+  File "/home/ubuntu/venv/lib/python3.12/site-packages/mpyc/runtime.py", line 181, in run
+    return self._loop.run_until_complete(f)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 685, in run_until_complete
+    raise RuntimeError('Event loop stopped before Future completed.')
+RuntimeError: Event loop stopped before Future completed.
