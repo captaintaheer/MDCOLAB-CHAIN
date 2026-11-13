@@ -1,6 +1,6 @@
 | Metric | Value |
 | --- | --- |
-| SMPC Exec Time (s) | 0.0056 |
+| SMPC Exec Time (s) | 0.5 |
 | SMPC Throughput (ops/s) | 891.3 |
 | SMPC Latency (s) | 0.0056 |
 | SMPC Comm Rounds | 5 |
